@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dimaagwala - Quiz & Trivia Game Platform</title>
+    <title>Dimaagwale - Quiz & Trivia Game Platform</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -133,7 +133,7 @@
                 <div class="flex justify-between items-center">
                     <div class="flex items-center space-x-2">
                         <i class="fas fa-brain text-2xl brain-logo"></i>
-                        <h1 class="text-2xl font-bold">Dimaagwala</h1>
+                        <h1 class="text-2xl font-bold">Dimaagwale</h1>
                     </div>
                     <div class="flex items-center space-x-4">
                         <button id="themeToggle" class="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-all">
@@ -160,7 +160,7 @@
                     <div class="text-6xl mb-4 animate-bounce-slow">
                         <i class="fas fa-brain brain-logo"></i>
                     </div>
-                    <h2 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">Welcome to Dimaagwala</h2>
+                    <h2 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">Welcome to Dimaagwale</h2>
                     <p class="text-xl text-gray-600 dark:text-gray-300">Challenge your mind, compete with friends!</p>
                 </div>
 
@@ -957,13 +957,13 @@
 
         function initializeApp() {
             // Load user data from localStorage
-            const savedUser = localStorage.getItem('dimaagwalaUser');
+            const savedUser = localStorage.getItem('dimaagwaleUser');
             if (savedUser) {
                 currentUser = { ...currentUser, ...JSON.parse(savedUser) };
             }
 
             // Load theme preference
-            const savedTheme = localStorage.getItem('dimaagwalaTheme');
+            const savedTheme = localStorage.getItem('dimaagwaleTheme');
             if (savedTheme === 'dark') {
                 toggleTheme();
             }
@@ -1060,7 +1060,7 @@
                 themeIcon.classList.add('fa-moon');
             }
 
-            localStorage.setItem('dimaagwalaTheme', isDarkMode ? 'dark' : 'light');
+            localStorage.setItem('dimaagwaleTheme', isDarkMode ? 'dark' : 'light');
         }
 
         function updateUserDisplay() {
@@ -1072,7 +1072,7 @@
         }
 
         function saveUserData() {
-            localStorage.setItem('dimaagwalaUser', JSON.stringify(currentUser));
+            localStorage.setItem('dimaagwaleUser', JSON.stringify(currentUser));
         }
 
         function populateTopPlayers() {
@@ -1787,9 +1787,9 @@
             };
             
             // Save to localStorage
-            const savedQuizzes = JSON.parse(localStorage.getItem('dimaagwalaQuizzes') || '[]');
+            const savedQuizzes = JSON.parse(localStorage.getItem('dimaagwaleQuizzes') || '[]');
             savedQuizzes.push(quiz);
-            localStorage.setItem('dimaagwalaQuizzes', JSON.stringify(savedQuizzes));
+            localStorage.setItem('dimaagwaleQuizzes', JSON.stringify(savedQuizzes));
             
             showNotification('Quiz saved successfully!', 'success');
             showScreen('organizerScreen');
@@ -1947,8 +1947,8 @@
         }
 
         // Initialize some sample data on first load
-        if (!localStorage.getItem('dimaagwalaInitialized')) {
-            localStorage.setItem('dimaagwalaInitialized', 'true');
+        if (!localStorage.getItem('dimaagwaleInitialized')) {
+            localStorage.setItem('dimaagwaleInitialized', 'true');
             // Add any initialization logic here
         }
     </script>
@@ -1956,19 +1956,19 @@
 <!-- Simplified First-Time Welcome -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  const profile = JSON.parse(localStorage.getItem("dimaagwalaUserProfile") || "null");
+  const profile = JSON.parse(localStorage.getItem("dimaagwaleUserProfile") || "null");
 
   // Greet only with first name if full profile not set
   if (!profile || !profile.name) {
-    const firstName = prompt("Welcome to Dimaagwala! What's your name?");
+    const firstName = prompt("Welcome to Dimaagwale! What's your name?");
     if (firstName) {
-      localStorage.setItem("dimaagwalaUserProfile", JSON.stringify({ name: firstName }));
+      localStorage.setItem("dimaagwaleUserProfile", JSON.stringify({ name: firstName }));
       alert("Hi " + firstName + "! Enjoy exploring our massive quiz library.");
     }
   }
 
   // Show name
-  const profileNow = JSON.parse(localStorage.getItem("dimaagwalaUserProfile") || "null");
+  const profileNow = JSON.parse(localStorage.getItem("dimaagwaleUserProfile") || "null");
   const userNameEl = document.getElementById("userName");
   if (userNameEl && profileNow?.name) {
     userNameEl.textContent = profileNow.name;
@@ -1979,7 +1979,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (userButton) {
     userButton.addEventListener("click", function () {
       document.getElementById("profileModal").style.display = "flex";
-      const current = JSON.parse(localStorage.getItem("dimaagwalaUserProfile") || "{}");
+      const current = JSON.parse(localStorage.getItem("dimaagwaleUserProfile") || "{}");
       if (current.name) document.getElementById("fullName").value = current.name;
       if (current.age) document.getElementById("age").value = current.age;
       if (current.email) document.getElementById("email").value = current.email;
@@ -2003,7 +2003,7 @@ function saveUserProfile() {
   }
 
   const profile = { name, age, email };
-  localStorage.setItem("dimaagwalaUserProfile", JSON.stringify(profile));
+  localStorage.setItem("dimaagwaleUserProfile", JSON.stringify(profile));
   document.getElementById("profileModal").style.display = "none";
   const userNameEl = document.getElementById("userName");
   if (userNameEl) userNameEl.textContent = profile.name;
@@ -2020,6 +2020,92 @@ function saveUserProfile() {
     <button onclick="saveUserProfile()" style="width:100%;padding:10px;background:#4CAF50;color:white;border:none;border-radius:5px;">Save Profile</button>
   </div>
 </div>
+
+
+<!-- Welcome Modal for First Time Users -->
+<div id="welcomeModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);backdrop-filter:blur(5px);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;padding:30px;border-radius:12px;width:90%;max-width:400px;text-align:center;">
+    <h2>🧠 Welcome to Dimaagwale!</h2>
+    <p class="mb-4 text-sm">Tell us your name to get started</p>
+    <input id="firstNameInput" placeholder="Your Name" style="padding:10px;width:100%;margin-bottom:15px;" />
+    <button onclick="saveWelcomeName()" style="padding:10px 20px;background:#4CAF50;color:white;border:none;border-radius:5px;">Let’s Go</button>
+  </div>
+</div>
+
+<!-- Full Profile Modal -->
+<div id="profileModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;padding:25px 30px;border-radius:12px;max-width:400px;width:90%;">
+    <h2 style="text-align:center;">📄 Save Your Profile</h2>
+    <p class="text-sm text-center mb-4">Sign up to save your progress</p>
+    <input id="fullName" placeholder="Full Name" style="width:100%;padding:10px;margin-bottom:10px;" />
+    <input id="age" type="number" placeholder="Age (optional)" style="width:100%;padding:10px;margin-bottom:10px;" />
+    <input id="email" type="email" placeholder="Email (required)" style="width:100%;padding:10px;margin-bottom:15px;" />
+    <button onclick="saveUserProfile()" style="width:100%;padding:10px;background:#4CAF50;color:white;border:none;border-radius:5px;">Save Profile</button>
+  </div>
+</div>
+
+<style>
+#homeBtn {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background: #FF9800;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 8px;
+  font-weight: bold;
+  z-index: 10000;
+  cursor: pointer;
+}
+</style>
+<div id="homeBtn" onclick="showScreen('homeScreen')">🏠 Home</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const profile = JSON.parse(localStorage.getItem("dimaagwaleUserProfile") || "null");
+  if (!profile || !profile.name) {
+    document.getElementById("welcomeModal").style.display = "flex";
+  } else {
+    const userNameEl = document.getElementById("userName");
+    if (userNameEl) userNameEl.textContent = profile.name;
+  }
+
+  const userBtn = document.getElementById("userProfile");
+  if (userBtn) {
+    userBtn.addEventListener("click", () => {
+      document.getElementById("profileModal").style.display = "flex";
+      const data = JSON.parse(localStorage.getItem("dimaagwaleUserProfile") || "{}");
+      if (data.name) document.getElementById("fullName").value = data.name;
+      if (data.age) document.getElementById("age").value = data.age;
+      if (data.email) document.getElementById("email").value = data.email;
+    });
+  }
+});
+
+function saveWelcomeName() {
+  const name = document.getElementById("firstNameInput").value.trim();
+  if (!name) return alert("Please enter your name");
+  localStorage.setItem("dimaagwaleUserProfile", JSON.stringify({ name }));
+  document.getElementById("welcomeModal").style.display = "none";
+  const userNameEl = document.getElementById("userName");
+  if (userNameEl) userNameEl.textContent = name;
+  alert("Hi " + name + "! Let’s test your brainpower 🧠");
+}
+
+function saveUserProfile() {
+  const name = document.getElementById("fullName").value.trim();
+  const age = document.getElementById("age").value.trim();
+  const email = document.getElementById("email").value.trim();
+  if (!name || !email || !/^\S+@\S+\.\S+$/.test(email)) {
+    alert("Please enter a valid name and email.");
+    return;
+  }
+  localStorage.setItem("dimaagwaleUserProfile", JSON.stringify({ name, age, email }));
+  document.getElementById("profileModal").style.display = "none";
+  const userNameEl = document.getElementById("userName");
+  if (userNameEl) userNameEl.textContent = name;
+}
+</script>
 
 </body>
 </html>
