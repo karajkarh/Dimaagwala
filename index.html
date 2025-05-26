@@ -1952,5 +1952,58 @@
             // Add any initialization logic here
         }
     </script>
+
+<!-- Profile Modal -->
+<div id="profileModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;padding:25px 30px;border-radius:12px;max-width:400px;width:90%;">
+    <h2 style="font-size:20px;margin-bottom:15px;text-align:center;">Create Your Profile</h2>
+    <input id="firstName" placeholder="First Name" style="width:100%;padding:10px;margin-bottom:10px;" />
+    <input id="lastName" placeholder="Last Name" style="width:100%;padding:10px;margin-bottom:10px;" />
+    <input id="age" type="number" placeholder="Age (optional)" style="width:100%;padding:10px;margin-bottom:10px;" />
+    <input id="email" type="email" placeholder="Email (required)" style="width:100%;padding:10px;margin-bottom:15px;" />
+    <button onclick="saveUserProfile()" style="width:100%;padding:10px;background:#4CAF50;color:white;border:none;border-radius:5px;">Save Profile</button>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const profile = JSON.parse(localStorage.getItem("dimaagwalaUserProfile") || "null");
+  if (!profile || !profile.email) {
+    document.getElementById("profileModal").style.display = "flex";
+  } else {
+    const userNameEl = document.getElementById("userName");
+    if (userNameEl) userNameEl.textContent = profile.name;
+  }
+});
+
+function validateEmail(email) {
+  const re = /^\S+@\S+\.\S+$/;
+  return re.test(email);
+}
+
+function saveUserProfile() {
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName = document.getElementById("lastName").value.trim();
+  const age = document.getElementById("age").value.trim();
+  const email = document.getElementById("email").value.trim();
+
+  if (!firstName || !lastName || !email || !validateEmail(email)) {
+    alert("Please fill out First Name, Last Name, and a valid Email.");
+    return;
+  }
+
+  const profile = {
+    name: firstName + " " + lastName,
+    age: age,
+    email: email
+  };
+
+  localStorage.setItem("dimaagwalaUserProfile", JSON.stringify(profile));
+  document.getElementById("profileModal").style.display = "none";
+  const userNameEl = document.getElementById("userName");
+  if (userNameEl) userNameEl.textContent = profile.name;
+}
+</script>
+
 </body>
 </html>
