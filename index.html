@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dimaagwala - Quiz & Trivia Game Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-orange {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .gradient-purple {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .brain-logo {
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .animate-bounce-slow {
+            animation: bounce 2s infinite;
+        }
+        
+        .animate-pulse-soft {
+            animation: pulse 3s infinite;
+        }
+        
+        .confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); }
+            100% { transform: translateY(100vh) rotate(360deg); }
+        }
+        
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confetti-fall 3s linear infinite;
+        }
+        
+        .dark .dark\:bg-gray-900 {
+            background-color: #1a202c;
+        }
+        
+        .dark .dark\:bg-gray-800 {
+            background-color: #2d3748;
+        }
+        
+        .dark .dark\:text-white {
+            color: #ffffff;
+        }
+        
+        .dark .dark\:text-gray-300 {
+            color: #cbd5e0;
+        }
+        
+        .quiz-card {
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+        
+        .quiz-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        
+        .timer-ring {
+            transition: stroke-dashoffset 1s linear;
+        }
+        
+        .leaderboard-item {
+            animation: slideInRight 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        
+        @keyframes slideInRight {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .notification {
+            animation: slideInDown 0.5s ease-out;
+        }
+        
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div id="app" class="min-h-screen">
+        <!-- Navigation Header -->
+        <nav class="gradient-bg text-white shadow-lg sticky top-0 z-50">
+            <div class="container mx-auto px-4 py-3">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-brain text-2xl brain-logo"></i>
+                        <h1 class="text-2xl font-bold">Dimaagwala</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button id="themeToggle" class="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-all">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-coins text-yellow-300"></i>
+                            <span id="userCoins">1000</span>
+                        </div>
+                        <button id="userProfile" class="flex items-center space-x-2 bg-white bg-opacity-20 rounded-full px-3 py-1">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L13.5 2.5L16.17 5.17L10.5 10.84L15.16 15.5L17.5 13.16L20.17 15.84L21.5 14.34L19 11.84V9H21ZM12.5 12.5C12.5 13.33 11.83 14 11 14S9.5 13.33 9.5 12.5 10.17 11 11 11 12.5 11.67 12.5 12.5Z'/%3E%3C/svg%3E" alt="User" class="w-6 h-6 rounded-full">
+                            <span id="userName">Player</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-6">
+            <!-- Home Screen -->
+            <div id="homeScreen" class="screen">
+                <div class="text-center mb-8">
+                    <div class="text-6xl mb-4 animate-bounce-slow">
+                        <i class="fas fa-brain brain-logo"></i>
+                    </div>
+                    <h2 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">Welcome to Dimaagwala</h2>
+                    <p class="text-xl text-gray-600 dark:text-gray-300">Challenge your mind, compete with friends!</p>
+                </div>
+
+                <!-- User Stats Dashboard -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 dark:text-gray-300">Current Rank</p>
+                                <p class="text-2xl font-bold text-purple-600" id="userRank">Scholar</p>
+                            </div>
+                            <i class="fas fa-trophy text-3xl text-yellow-500"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 dark:text-gray-300">Total XP</p>
+                                <p class="text-2xl font-bold text-blue-600" id="userXP">2,450</p>
+                            </div>
+                            <i class="fas fa-star text-3xl text-blue-500"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 dark:text-gray-300">Win Rate</p>
+                                <p class="text-2xl font-bold text-green-600" id="winRate">78%</p>
+                            </div>
+                            <i class="fas fa-chart-line text-3xl text-green-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Mode Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="quiz-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg cursor-pointer" onclick="showScreen('soloScreen')">
+                        <div class="gradient-bg text-white rounded-lg p-4 mb-4">
+                            <i class="fas fa-user text-3xl mb-2"></i>
+                            <h3 class="text-xl font-bold">Solo Play</h3>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Practice and learn with solo quizzes</p>
+                        <div class="flex justify-between text-sm text-gray-500">
+                            <span><i class="fas fa-clock"></i> 10-20 questions</span>
+                            <span><i class="fas fa-heart"></i> 3 lifelines</span>
+                        </div>
+                    </div>
+
+                    <div class="quiz-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg cursor-pointer" onclick="showScreen('battleScreen')">
+                        <div class="gradient-orange text-white rounded-lg p-4 mb-4">
+                            <i class="fas fa-users text-3xl mb-2"></i>
+                            <h3 class="text-xl font-bold">Battle Mode</h3>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Compete with players worldwide</p>
+                        <div class="flex justify-between text-sm text-gray-500">
+                            <span><i class="fas fa-trophy"></i> Live competition</span>
+                            <span><i class="fas fa-bolt"></i> Speed matters</span>
+                        </div>
+                    </div>
+
+                    <div class="quiz-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg cursor-pointer" onclick="showScreen('organizerScreen')">
+                        <div class="gradient-purple text-white rounded-lg p-4 mb-4">
+                            <i class="fas fa-crown text-3xl mb-2"></i>
+                            <h3 class="text-xl font-bold">Host Quiz</h3>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Create and host custom quizzes</p>
+                        <div class="flex justify-between text-sm text-gray-500">
+                            <span><i class="fas fa-edit"></i> Custom questions</span>
+                            <span><i class="fas fa-share"></i> Share with friends</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weekly Challenges -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+                        <i class="fas fa-calendar-week text-purple-500 mr-2"></i>
+                        Weekly Challenge
+                    </h3>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">Science & Technology Quiz</p>
+                            <p class="text-gray-600 dark:text-gray-400">Answer 50 questions correctly to win 500 coins!</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-500">Progress: 32/50</p>
+                            <div class="w-32 bg-gray-200 rounded-full h-2 mt-1">
+                                <div class="bg-purple-600 h-2 rounded-full progress-bar" style="width: 64%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leaderboard Preview -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white">
+                            <i class="fas fa-trophy text-yellow-500 mr-2"></i>
+                            Top Players
+                        </h3>
+                        <button onclick="showScreen('leaderboardScreen')" class="text-purple-600 hover:text-purple-800">View All</button>
+                    </div>
+                    <div id="topPlayers" class="space-y-3">
+                        <!-- Top players will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Solo Play Screen -->
+            <div id="soloScreen" class="screen hidden">
+                <div class="mb-6">
+                    <button onclick="showScreen('homeScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                    </button>
+                </div>
+
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Solo Play Mode</h2>
+                    <p class="text-gray-600 dark:text-gray-300">Choose a category and test your knowledge!</p>
+                </div>
+
+                <!-- Category Selection -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="category-card bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all" data-category="general">
+                        <div class="text-center">
+                            <i class="fas fa-globe text-3xl text-blue-500 mb-2"></i>
+                            <h3 class="font-bold text-gray-800 dark:text-white">General Knowledge</h3>
+                        </div>
+                    </div>
+                    <div class="category-card bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all" data-category="sports">
+                        <div class="text-center">
+                            <i class="fas fa-football-ball text-3xl text-green-500 mb-2"></i>
+                            <h3 class="font-bold text-gray-800 dark:text-white">Sports</h3>
+                        </div>
+                    </div>
+                    <div class="category-card bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all" data-category="movies">
+                        <div class="text-center">
+                            <i class="fas fa-film text-3xl text-red-500 mb-2"></i>
+                            <h3 class="font-bold text-gray-800 dark:text-white">Movies</h3>
+                        </div>
+                    </div>
+                    <div class="category-card bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all" data-category="history">
+                        <div class="text-center">
+                            <i class="fas fa-landmark text-3xl text-yellow-500 mb-2"></i>
+                            <h3 class="font-bold text-gray-800 dark:text-white">History</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Difficulty Selection -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Select Difficulty</h3>
+                    <div class="flex space-x-4">
+                        <button class="difficulty-btn bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors" data-difficulty="easy">
+                            <i class="fas fa-seedling mr-2"></i>Easy
+                        </button>
+                        <button class="difficulty-btn bg-yellow-500 text-white px-6 py-2 rounded-lg hover:bg-yellow-600 transition-colors" data-difficulty="medium">
+                            <i class="fas fa-fire mr-2"></i>Medium
+                        </button>
+                        <button class="difficulty-btn bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors" data-difficulty="hard">
+                            <i class="fas fa-skull mr-2"></i>Hard
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button id="startSoloGame" class="gradient-bg text-white px-8 py-3 rounded-lg text-xl font-bold hover:opacity-90 transition-opacity disabled:opacity-50" disabled>
+                        <i class="fas fa-play mr-2"></i>Start Game
+                    </button>
+                </div>
+            </div>
+
+            <!-- Solo Game Screen -->
+            <div id="soloGameScreen" class="screen hidden">
+                <div class="mb-6">
+                    <div class="flex justify-between items-center">
+                        <button onclick="showScreen('soloScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                            <i class="fas fa-times mr-2"></i>Quit
+                        </button>
+                        <div class="flex items-center space-x-4">
+                            <div class="text-center">
+                                <p class="text-sm text-gray-600 dark:text-gray-300">Question</p>
+                                <p class="text-xl font-bold text-gray-800 dark:text-white"><span id="currentQuestion">1</span>/<span id="totalQuestions">10</span></p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm text-gray-600 dark:text-gray-300">Score</p>
+                                <p class="text-xl font-bold text-purple-600" id="currentScore">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timer Circle -->
+                <div class="text-center mb-6">
+                    <div class="relative inline-block">
+                        <svg class="w-20 h-20 transform -rotate-90">
+                            <circle cx="40" cy="40" r="36" stroke="#e5e7eb" stroke-width="8" fill="transparent"></circle>
+                            <circle id="timerCircle" cx="40" cy="40" r="36" stroke="#8b5cf6" stroke-width="8" fill="transparent" 
+                                stroke-dasharray="226" stroke-dashoffset="0" class="timer-ring"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="timeLeft" class="text-2xl font-bold text-purple-600">15</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+                    <h3 id="questionText" class="text-xl font-bold text-gray-800 dark:text-white mb-6">Loading question...</h3>
+                    <div id="answerOptions" class="space-y-3">
+                        <!-- Answer options will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Lifelines -->
+                <div class="flex justify-center space-x-4 mb-6">
+                    <button id="lifeline5050" class="lifeline-btn bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-divide mr-2"></i>50-50
+                    </button>
+                    <button id="lifelineSkip" class="lifeline-btn bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors">
+                        <i class="fas fa-forward mr-2"></i>Skip
+                    </button>
+                    <button id="lifelineFreeze" class="lifeline-btn bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
+                        <i class="fas fa-snowflake mr-2"></i>Freeze Time
+                    </button>
+                </div>
+            </div>
+
+            <!-- Battle Mode Screen -->
+            <div id="battleScreen" class="screen hidden">
+                <div class="mb-6">
+                    <button onclick="showScreen('homeScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                    </button>
+                </div>
+
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Battle Mode</h2>
+                    <p class="text-gray-600 dark:text-gray-300">Compete with players from around the world!</p>
+                </div>
+
+                <!-- Join Options -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                            <i class="fas fa-random text-purple-500 mr-2"></i>
+                            Quick Match
+                        </h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Get matched with players of similar skill level</p>
+                        <button id="quickMatch" class="gradient-bg text-white w-full py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                            <i class="fas fa-bolt mr-2"></i>Find Match
+                        </button>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                            <i class="fas fa-key text-orange-500 mr-2"></i>
+                            Join Room
+                        </h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Enter a room code to join a specific game</p>
+                        <div class="flex space-x-2">
+                            <input id="roomCode" type="text" placeholder="Enter room code" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <button id="joinRoom" class="gradient-orange text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                                Join
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Rooms -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                        <i class="fas fa-door-open text-green-500 mr-2"></i>
+                        Active Rooms
+                    </h3>
+                    <div id="activeRooms" class="space-y-3">
+                        <!-- Active rooms will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Battle Game Screen -->
+            <div id="battleGameScreen" class="screen hidden">
+                <div class="mb-6">
+                    <div class="flex justify-between items-center">
+                        <button onclick="leaveBattle()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                            <i class="fas fa-door-open mr-2"></i>Leave Battle
+                        </button>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Room Code</p>
+                            <p class="text-xl font-bold text-purple-600" id="battleRoomCode">ABC123</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Question</p>
+                            <p class="text-xl font-bold text-gray-800 dark:text-white"><span id="battleCurrentQuestion">1</span>/10</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Leaderboard -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-3">
+                        <i class="fas fa-trophy text-yellow-500 mr-2"></i>
+                        Live Rankings
+                    </h3>
+                    <div id="battleLeaderboard" class="space-y-2">
+                        <!-- Battle leaderboard will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Timer and Question -->
+                <div class="text-center mb-6">
+                    <div class="relative inline-block">
+                        <svg class="w-20 h-20 transform -rotate-90">
+                            <circle cx="40" cy="40" r="36" stroke="#e5e7eb" stroke-width="8" fill="transparent"></circle>
+                            <circle id="battleTimerCircle" cx="40" cy="40" r="36" stroke="#f59e0b" stroke-width="8" fill="transparent" 
+                                stroke-dasharray="226" stroke-dashoffset="0" class="timer-ring"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="battleTimeLeft" class="text-2xl font-bold text-orange-600">15</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+                    <h3 id="battleQuestionText" class="text-xl font-bold text-gray-800 dark:text-white mb-6">Loading question...</h3>
+                    <div id="battleAnswerOptions" class="space-y-3">
+                        <!-- Battle answer options will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Organizer Screen -->
+            <div id="organizerScreen" class="screen hidden">
+                <div class="mb-6">
+                    <button onclick="showScreen('homeScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                    </button>
+                </div>
+
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Create & Host Quiz</h2>
+                    <p class="text-gray-600 dark:text-gray-300">Design your own quiz and invite friends to play!</p>
+                </div>
+
+                <!-- Quiz Creation Options -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                            <i class="fas fa-edit text-blue-500 mr-2"></i>
+                            Create Manually
+                        </h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Add questions one by one with custom options</p>
+                        <button onclick="showScreen('createQuizScreen')" class="gradient-bg text-white w-full py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                            <i class="fas fa-plus mr-2"></i>Start Creating
+                        </button>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                            <i class="fas fa-upload text-green-500 mr-2"></i>
+                            Upload CSV/Excel
+                        </h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Import questions from a spreadsheet file</p>
+                        <input type="file" id="csvUpload" accept=".csv,.xlsx,.xls" class="hidden">
+                        <button onclick="document.getElementById('csvUpload').click()" class="gradient-purple text-white w-full py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                            <i class="fas fa-file-upload mr-2"></i>Upload File
+                        </button>
+                    </div>
+                </div>
+
+                <!-- My Quizzes -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                        <i class="fas fa-list text-purple-500 mr-2"></i>
+                        My Quizzes
+                    </h3>
+                    <div id="myQuizzes" class="space-y-3">
+                        <!-- User's quizzes will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Premium Features -->
+                <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-6 shadow-lg text-white">
+                    <h3 class="text-xl font-bold mb-2">
+                        <i class="fas fa-crown mr-2"></i>
+                        Premium Organizer Features
+                    </h3>
+                    <p class="mb-4">Unlock unlimited quizzes, advanced analytics, and custom branding!</p>
+                    <div class="flex space-x-4">
+                        <button class="bg-white text-purple-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition-colors">
+                            ₹49/month
+                        </button>
+                        <button class="bg-white text-purple-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition-colors">
+                            ₹10/quiz
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Quiz Screen -->
+            <div id="createQuizScreen" class="screen hidden">
+                <div class="mb-6">
+                    <button onclick="showScreen('organizerScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Organizer
+                    </button>
+                </div>
+
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Create Your Quiz</h2>
+                    <p class="text-gray-600 dark:text-gray-300">Design engaging questions for your participants</p>
+                </div>
+
+                <!-- Quiz Settings -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Quiz Settings</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quiz Title</label>
+                            <input id="quizTitle" type="text" placeholder="Enter quiz title" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
+                            <select id="quizCategory" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="general">General Knowledge</option>
+                                <option value="sports">Sports</option>
+                                <option value="movies">Movies</option>
+                                <option value="history">History</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Time per Question (seconds)</label>
+                            <input id="questionTime" type="number" value="15" min="5" max="60" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quiz Mode</label>
+                            <select id="quizMode" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="auto">Auto-advance</option>
+                                <option value="manual">Manual control</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question Builder -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white">Questions</h3>
+                        <button id="addQuestion" class="gradient-bg text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
+                            <i class="fas fa-plus mr-2"></i>Add Question
+                        </button>
+                    </div>
+                    <div id="questionsList" class="space-y-4">
+                        <!-- Questions will be added here -->
+                    </div>
+                </div>
+
+                <!-- Save Quiz -->
+                <div class="text-center">
+                    <button id="saveQuiz" class="gradient-bg text-white px-8 py-3 rounded-lg text-xl font-bold hover:opacity-90 transition-opacity">
+                        <i class="fas fa-save mr-2"></i>Save Quiz
+                    </button>
+                </div>
+            </div>
+
+            <!-- Host Quiz Screen -->
+            <div id="hostQuizScreen" class="screen hidden">
+                <div class="mb-6">
+                    <div class="flex justify-between items-center">
+                        <button onclick="endQuizSession()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                            <i class="fas fa-stop mr-2"></i>End Quiz
+                        </button>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Room Code</p>
+                            <p class="text-2xl font-bold text-purple-600" id="hostRoomCode">QUIZ123</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Players</p>
+                            <p class="text-2xl font-bold text-green-600" id="playerCount">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Host Controls -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+                    <div class="flex justify-center space-x-4">
+                        <button id="nextQuestion" class="gradient-bg text-white px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                            <i class="fas fa-forward mr-2"></i>Next Question
+                        </button>
+                        <button id="showResults" class="gradient-orange text-white px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                            <i class="fas fa-chart-bar mr-2"></i>Show Results
+                        </button>
+                        <button id="pauseQuiz" class="bg-yellow-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-yellow-600 transition-colors">
+                            <i class="fas fa-pause mr-2"></i>Pause
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Current Question Display -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+                    <div class="text-center mb-4">
+                        <h3 class="text-sm text-gray-600 dark:text-gray-300">Question <span id="hostCurrentQuestion">1</span> of <span id="hostTotalQuestions">10</span></h3>
+                        <div class="w-32 bg-gray-200 rounded-full h-2 mt-2 mx-auto">
+                            <div id="hostProgress" class="bg-purple-600 h-2 rounded-full progress-bar" style="width: 10%"></div>
+                        </div>
+                    </div>
+                    <h3 id="hostQuestionText" class="text-xl font-bold text-gray-800 dark:text-white text-center mb-6">Waiting to start quiz...</h3>
+                    <div id="hostAnswerOptions" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Host answer options will be displayed here -->
+                    </div>
+                </div>
+
+                <!-- Live Player Responses -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                        <i class="fas fa-users text-blue-500 mr-2"></i>
+                        Live Responses
+                    </h3>
+                    <div id="liveResponses" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <!-- Live player responses will be shown here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboard Screen -->
+            <div id="leaderboardScreen" class="screen hidden">
+                <div class="mb-6">
+                    <button onclick="showScreen('homeScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                    </button>
+                </div>
+
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+                        <i class="fas fa-trophy text-yellow-500 mr-2"></i>
+                        Global Leaderboard
+                    </h2>
+                    <p class="text-gray-600 dark:text-gray-300">Top players from around the world</p>
+                </div>
+
+                <!-- Leaderboard Filters -->
+                <div class="flex justify-center space-x-4 mb-6">
+                    <button class="leaderboard-filter bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors" data-filter="all">
+                        All Time
+                    </button>
+                    <button class="leaderboard-filter bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors" data-filter="monthly">
+                        This Month
+                    </button>
+                    <button class="leaderboard-filter bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors" data-filter="weekly">
+                        This Week
+                    </button>
+                </div>
+
+                <!-- Top 3 Podium -->
+                <div class="flex justify-center items-end space-x-4 mb-8">
+                    <!-- 2nd Place -->
+                    <div class="text-center">
+                        <div class="bg-gradient-to-t from-gray-400 to-gray-500 w-20 h-16 rounded-t-lg flex items-end justify-center">
+                            <span class="text-white font-bold text-lg mb-2">2</span>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg mt-2 w-32">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='%236b7280'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L13.5 2.5L16.17 5.17L10.5 10.84L15.16 15.5L17.5 13.16L20.17 15.84L21.5 14.34L19 11.84V9H21Z'/%3E%3C/svg%3E" alt="Player 2" class="w-12 h-12 mx-auto mb-2 rounded-full">
+                            <p class="font-bold text-sm text-gray-800 dark:text-white">Sarah M.</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-300">8,542 XP</p>
+                        </div>
+                    </div>
+
+                    <!-- 1st Place -->
+                    <div class="text-center">
+                        <div class="bg-gradient-to-t from-yellow-400 to-yellow-500 w-24 h-20 rounded-t-lg flex items-end justify-center">
+                            <span class="text-white font-bold text-xl mb-2">1</span>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg mt-2 w-36">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 24 24' fill='%23f59e0b'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L13.5 2.5L16.17 5.17L10.5 10.84L15.16 15.5L17.5 13.16L20.17 15.84L21.5 14.34L19 11.84V9H21Z'/%3E%3C/svg%3E" alt="Player 1" class="w-14 h-14 mx-auto mb-2 rounded-full">
+                            <p class="font-bold text-gray-800 dark:text-white">Alex K.</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">12,890 XP</p>
+                            <div class="flex justify-center mt-1">
+                                <i class="fas fa-crown text-yellow-500"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3rd Place -->
+                    <div class="text-center">
+                        <div class="bg-gradient-to-t from-orange-400 to-orange-500 w-16 h-12 rounded-t-lg flex items-end justify-center">
+                            <span class="text-white font-bold mb-1">3</span>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg mt-2 w-28">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='%236b7280'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L13.5 2.5L16.17 5.17L10.5 10.84L15.16 15.5L17.5 13.16L20.17 15.84L21.5 14.34L19 11.84V9H21Z'/%3E%3C/svg%3E" alt="Player 3" class="w-10 h-10 mx-auto mb-2 rounded-full">
+                            <p class="font-bold text-xs text-gray-800 dark:text-white">Mike R.</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-300">7,234 XP</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Full Leaderboard -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <div id="fullLeaderboard" class="space-y-3">
+                        <!-- Full leaderboard will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Results Screen -->
+            <div id="resultsScreen" class="screen hidden">
+                <div class="text-center mb-8">
+                    <div id="resultIcon" class="text-6xl mb-4">
+                        <i class="fas fa-trophy text-yellow-500"></i>
+                    </div>
+                    <h2 id="resultTitle" class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Congratulations!</h2>
+                    <p id="resultSubtitle" class="text-xl text-gray-600 dark:text-gray-300">You've completed the quiz!</p>
+                </div>
+
+                <!-- Score Breakdown -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg text-center">
+                        <i class="fas fa-bullseye text-3xl text-green-500 mb-3"></i>
+                        <p class="text-2xl font-bold text-gray-800 dark:text-white" id="finalScore">0</p>
+                        <p class="text-gray-600 dark:text-gray-300">Final Score</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg text-center">
+                        <i class="fas fa-percentage text-3xl text-blue-500 mb-3"></i>
+                        <p class="text-2xl font-bold text-gray-800 dark:text-white" id="accuracyPercent">0%</p>
+                        <p class="text-gray-600 dark:text-gray-300">Accuracy</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg text-center">
+                        <i class="fas fa-star text-3xl text-purple-500 mb-3"></i>
+                        <p class="text-2xl font-bold text-gray-800 dark:text-white" id="xpGained">+0</p>
+                        <p class="text-gray-600 dark:text-gray-300">XP Gained</p>
+                    </div>
+                </div>
+
+                <!-- Performance Chart -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Performance Breakdown</h3>
+                    <canvas id="performanceChart" width="400" height="200"></canvas>
+                </div>
+
+                <!-- Share Results -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Share Your Achievement</h3>
+                    <div class="flex justify-center space-x-4">
+                        <button class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors">
+                            <i class="fab fa-whatsapp mr-2"></i>WhatsApp
+                        </button>
+                        <button class="bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600 transition-colors">
+                            <i class="fab fa-instagram mr-2"></i>Instagram
+                        </button>
+                        <button class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors">
+                            <i class="fab fa-twitter mr-2"></i>Twitter
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-center space-x-4">
+                    <button onclick="showScreen('homeScreen')" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-home mr-2"></i>Home
+                    </button>
+                    <button onclick="playAgain()" class="gradient-bg text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
+                        <i class="fas fa-redo mr-2"></i>Play Again
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Notification System -->
+        <div id="notifications" class="fixed top-20 right-4 z-50 space-y-2">
+            <!-- Notifications will appear here -->
+        </div>
+
+        <!-- Confetti Container -->
+        <div id="confetti" class="confetti hidden"></div>
+
+        <!-- Ad Modal -->
+        <div id="adModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4">
+                <div class="text-center">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Watch Ad for Reward</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">Watch a short video to earn bonus coins!</p>
+                    <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-8 mb-6">
+                        <i class="fas fa-play-circle text-6xl text-purple-500"></i>
+                        <p class="mt-2 text-gray-600 dark:text-gray-300">Advertisement Video</p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button onclick="closeAdModal()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                            Skip
+                        </button>
+                        <button onclick="watchAd()" class="gradient-bg text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
+                            Watch (+50 coins)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global App State
+        let currentUser = {
+            name: 'Player',
+            coins: 1000,
+            xp: 2450,
+            rank: 'Scholar',
+            winRate: 78,
+            gamesPlayed: 156,
+            badges: ['First Win', 'Speed Demon', 'Knowledge Seeker']
+        };
+
+        let currentScreen = 'homeScreen';
+        let isDarkMode = false;
+        let currentQuiz = null;
+        let currentQuestion = 0;
+        let gameScore = 0;
+        let gameTimer = null;
+        let selectedCategory = null;
+        let selectedDifficulty = null;
+        let lifelines = { fiftyFifty: true, skip: true, freeze: true };
+
+        // Sample Data
+        const sampleQuestions = {
+            general: [
+                {
+                    question: "What is the capital of France?",
+                    options: ["London", "Paris", "Berlin", "Madrid"],
+                    correct: 1,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Which planet is known as the Red Planet?",
+                    options: ["Venus", "Mars", "Jupiter", "Saturn"],
+                    correct: 1,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What is the largest ocean on Earth?",
+                    options: ["Atlantic", "Indian", "Arctic", "Pacific"],
+                    correct: 3,
+                    difficulty: "medium"
+                }
+            ],
+            sports: [
+                {
+                    question: "How many players are on a basketball team on the court?",
+                    options: ["4", "5", "6", "7"],
+                    correct: 1,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Which country has won the most FIFA World Cups?",
+                    options: ["Germany", "Argentina", "Brazil", "Italy"],
+                    correct: 2,
+                    difficulty: "medium"
+                }
+            ],
+            movies: [
+                {
+                    question: "Who directed the movie 'Inception'?",
+                    options: ["Steven Spielberg", "Christopher Nolan", "Martin Scorsese", "Quentin Tarantino"],
+                    correct: 1,
+                    difficulty: "medium"
+                }
+            ],
+            history: [
+                {
+                    question: "In which year did World War II end?",
+                    options: ["1944", "1945", "1946", "1947"],
+                    correct: 1,
+                    difficulty: "easy"
+                }
+            ]
+        };
+
+        const leaderboardData = [
+            { name: "Alex K.", xp: 12890, rank: "Guru", avatar: "👨‍💻" },
+            { name: "Sarah M.", xp: 8542, rank: "Scholar", avatar: "👩‍🎓" },
+            { name: "Mike R.", xp: 7234, rank: "Scholar", avatar: "👨‍🏫" },
+            { name: "Lisa T.", xp: 6890, rank: "Expert", avatar: "👩‍💼" },
+            { name: "John D.", xp: 5432, rank: "Expert", avatar: "👨‍🔬" },
+            { name: "Emma W.", xp: 4321, rank: "Rookie", avatar: "👩‍🎨" },
+            { name: "David L.", xp: 3210, rank: "Rookie", avatar: "👨‍⚕️" },
+            { name: "Anna S.", xp: 2100, rank: "Rookie", avatar: "👩‍🏭" }
+        ];
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            populateTopPlayers();
+            populateActiveRooms();
+            populateMyQuizzes();
+            setupEventListeners();
+        });
+
+        function initializeApp() {
+            // Load user data from localStorage
+            const savedUser = localStorage.getItem('dimaagwalaUser');
+            if (savedUser) {
+                currentUser = { ...currentUser, ...JSON.parse(savedUser) };
+            }
+
+            // Load theme preference
+            const savedTheme = localStorage.getItem('dimaagwalaTheme');
+            if (savedTheme === 'dark') {
+                toggleTheme();
+            }
+
+            updateUserDisplay();
+            showScreen('homeScreen');
+        }
+
+        function setupEventListeners() {
+            // Theme toggle
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+            // Category selection
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    selectedCategory = this.dataset.category;
+                    document.querySelectorAll('.category-card').forEach(c => c.classList.remove('ring-2', 'ring-purple-500'));
+                    this.classList.add('ring-2', 'ring-purple-500');
+                    checkSoloGameStart();
+                });
+            });
+
+            // Difficulty selection
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    selectedDifficulty = this.dataset.difficulty;
+                    document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('ring-2', 'ring-white'));
+                    this.classList.add('ring-2', 'ring-white');
+                    checkSoloGameStart();
+                });
+            });
+
+            // Start solo game
+            document.getElementById('startSoloGame').addEventListener('click', startSoloGame);
+
+            // Battle mode
+            document.getElementById('quickMatch').addEventListener('click', startQuickMatch);
+            document.getElementById('joinRoom').addEventListener('click', joinBattleRoom);
+
+            // Quiz creation
+            document.getElementById('addQuestion').addEventListener('click', addQuestionForm);
+            document.getElementById('saveQuiz').addEventListener('click', saveQuiz);
+
+            // CSV upload
+            document.getElementById('csvUpload').addEventListener('change', handleCSVUpload);
+
+            // Lifelines
+            document.getElementById('lifeline5050').addEventListener('click', use5050);
+            document.getElementById('lifelineSkip').addEventListener('click', useSkip);
+            document.getElementById('lifelineFreeze').addEventListener('click', useFreeze);
+
+            // Leaderboard filter
+            document.querySelectorAll('.leaderboard-filter').forEach(filter => {
+                filter.addEventListener('click', function() {
+                    document.querySelectorAll('.leaderboard-filter').forEach(f => {
+                        f.classList.remove('bg-purple-500', 'text-white');
+                        f.classList.add('bg-gray-300', 'text-gray-700');
+                    });
+                    this.classList.remove('bg-gray-300', 'text-gray-700');
+                    this.classList.add('bg-purple-500', 'text-white');
+                    populateLeaderboard(this.dataset.filter);
+                });
+            });
+        }
+
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.add('hidden');
+            });
+
+            // Show target screen
+            document.getElementById(screenId).classList.remove('hidden');
+            currentScreen = screenId;
+
+            // Initialize screen-specific data
+            if (screenId === 'leaderboardScreen') {
+                populateLeaderboard('all');
+            }
+        }
+
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            const body = document.body;
+            const themeIcon = document.querySelector('#themeToggle i');
+            
+            if (isDarkMode) {
+                body.classList.add('dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                body.classList.remove('dark');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+
+            localStorage.setItem('dimaagwalaTheme', isDarkMode ? 'dark' : 'light');
+        }
+
+        function updateUserDisplay() {
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userCoins').textContent = currentUser.coins;
+            document.getElementById('userRank').textContent = currentUser.rank;
+            document.getElementById('userXP').textContent = currentUser.xp.toLocaleString();
+            document.getElementById('winRate').textContent = currentUser.winRate + '%';
+        }
+
+        function saveUserData() {
+            localStorage.setItem('dimaagwalaUser', JSON.stringify(currentUser));
+        }
+
+        function populateTopPlayers() {
+            const container = document.getElementById('topPlayers');
+            const topThree = leaderboardData.slice(0, 3);
+            
+            container.innerHTML = topThree.map((player, index) => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center ${
+                            index === 0 ? 'bg-yellow-500' : 
+                            index === 1 ? 'bg-gray-400' : 'bg-orange-500'
+                        } text-white font-bold">
+                            ${index + 1}
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-800 dark:text-white">${player.name}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">${player.rank}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-purple-600">${player.xp.toLocaleString()}</p>
+                        <p class="text-xs text-gray-500">XP</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function populateActiveRooms() {
+            const container = document.getElementById('activeRooms');
+            const rooms = [
+                { code: 'ABC123', players: 8, category: 'General', host: 'QuizMaster99' },
+                { code: 'XYZ789', players: 12, category: 'Sports', host: 'SportsFan21' },
+                { code: 'DEF456', players: 5, category: 'Movies', host: 'CinemaLover' }
+            ];
+
+            container.innerHTML = rooms.map(room => `
+                <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer" onclick="joinSpecificRoom('${room.code}')">
+                    <div>
+                        <p class="font-semibold text-gray-800 dark:text-white">Room ${room.code}</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">${room.category} • Hosted by ${room.host}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-medium text-purple-600">${room.players} players</p>
+                        <button class="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded mt-1">Join</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function populateMyQuizzes() {
+            const container = document.getElementById('myQuizzes');
+            const quizzes = [
+                { title: 'My Science Quiz', questions: 15, plays: 42, created: '2 days ago' },
+                { title: 'History Challenge', questions: 20, plays: 28, created: '1 week ago' },
+                { title: 'Movie Trivia', questions: 12, plays: 67, created: '2 weeks ago' }
+            ];
+
+            container.innerHTML = quizzes.map(quiz => `
+                <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                    <div>
+                        <p class="font-semibold text-gray-800 dark:text-white">${quiz.title}</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">${quiz.questions} questions • ${quiz.plays} plays • Created ${quiz.created}</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="text-sm bg-blue-100 text-blue-600 px-3 py-1 rounded hover:bg-blue-200 transition-colors">
+                            <i class="fas fa-edit mr-1"></i>Edit
+                        </button>
+                        <button class="text-sm bg-green-100 text-green-600 px-3 py-1 rounded hover:bg-green-200 transition-colors" onclick="hostQuiz('${quiz.title}')">
+                            <i class="fas fa-play mr-1"></i>Host
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function populateLeaderboard(filter) {
+            const container = document.getElementById('fullLeaderboard');
+            let data = [...leaderboardData];
+
+            // Apply filter logic here
+            if (filter === 'monthly') {
+                data = data.map(player => ({ ...player, xp: Math.floor(player.xp * 0.3) }));
+            } else if (filter === 'weekly') {
+                data = data.map(player => ({ ...player, xp: Math.floor(player.xp * 0.1) }));
+            }
+
+            container.innerHTML = data.map((player, index) => `
+                <div class="leaderboard-item flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-600 last:border-b-0" style="animation-delay: ${index * 0.1}s">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
+                            index < 3 ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gray-400'
+                        }">
+                            ${index + 1}
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-800 dark:text-white">${player.name}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">${player.rank}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-purple-600">${player.xp.toLocaleString()}</p>
+                        <p class="text-xs text-gray-500">XP</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function checkSoloGameStart() {
+            const startBtn = document.getElementById('startSoloGame');
+            if (selectedCategory && selectedDifficulty) {
+                startBtn.disabled = false;
+                startBtn.classList.remove('opacity-50');
+            } else {
+                startBtn.disabled = true;
+                startBtn.classList.add('opacity-50');
+            }
+        }
+
+        function startSoloGame() {
+            // Get questions for selected category and difficulty
+            const questions = sampleQuestions[selectedCategory] || sampleQuestions.general;
+            currentQuiz = {
+                questions: questions.filter(q => q.difficulty === selectedDifficulty).slice(0, 10),
+                category: selectedCategory,
+                difficulty: selectedDifficulty
+            };
+
+            // Reset game state
+            currentQuestion = 0;
+            gameScore = 0;
+            lifelines = { fiftyFifty: true, skip: true, freeze: true };
+
+            // Show game screen
+            showScreen('soloGameScreen');
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            if (currentQuestion >= currentQuiz.questions.length) {
+                endGame();
+                return;
+            }
+
+            const question = currentQuiz.questions[currentQuestion];
+            
+            // Update UI
+            document.getElementById('currentQuestion').textContent = currentQuestion + 1;
+            document.getElementById('totalQuestions').textContent = currentQuiz.questions.length;
+            document.getElementById('currentScore').textContent = gameScore;
+            document.getElementById('questionText').textContent = question.question;
+
+            // Display answer options
+            const optionsContainer = document.getElementById('answerOptions');
+            optionsContainer.innerHTML = question.options.map((option, index) => `
+                <button class="answer-option w-full p-4 text-left border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900 transition-all" 
+                        data-index="${index}" onclick="selectAnswer(${index})">
+                    <span class="font-semibold">${String.fromCharCode(65 + index)}.</span> ${option}
+                </button>
+            `).join('');
+
+            // Start timer
+            startTimer(15);
+        }
+
+        function startTimer(seconds) {
+            let timeLeft = seconds;
+            const timerDisplay = document.getElementById('timeLeft');
+            const timerCircle = document.getElementById('timerCircle');
+            const circumference = 2 * Math.PI * 36;
+            
+            timerDisplay.textContent = timeLeft;
+            
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                
+                const progress = (seconds - timeLeft) / seconds;
+                const dashOffset = circumference * progress;
+                timerCircle.style.strokeDashoffset = dashOffset;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(gameTimer);
+                    timeUp();
+                }
+            }, 1000);
+        }
+
+        function selectAnswer(answerIndex) {
+            clearInterval(gameTimer);
+            
+            const question = currentQuiz.questions[currentQuestion];
+            const isCorrect = answerIndex === question.correct;
+            
+            // Highlight correct/incorrect answers
+            const options = document.querySelectorAll('.answer-option');
+            options.forEach((option, index) => {
+                if (index === question.correct) {
+                    option.classList.add('bg-green-500', 'text-white', 'border-green-500');
+                } else if (index === answerIndex && !isCorrect) {
+                    option.classList.add('bg-red-500', 'text-white', 'border-red-500');
+                }
+                option.disabled = true;
+            });
+
+            if (isCorrect) {
+                gameScore += calculateScore();
+                showNotification('Correct! +' + calculateScore() + ' points', 'success');
+            } else {
+                showNotification('Incorrect! The correct answer was: ' + question.options[question.correct], 'error');
+            }
+
+            // Move to next question after delay
+            setTimeout(() => {
+                currentQuestion++;
+                displayQuestion();
+            }, 2000);
+        }
+
+        function timeUp() {
+            const question = currentQuiz.questions[currentQuestion];
+            
+            // Highlight correct answer
+            const options = document.querySelectorAll('.answer-option');
+            options[question.correct].classList.add('bg-green-500', 'text-white', 'border-green-500');
+            
+            showNotification('Time\'s up! The correct answer was: ' + question.options[question.correct], 'warning');
+            
+            setTimeout(() => {
+                currentQuestion++;
+                displayQuestion();
+            }, 2000);
+        }
+
+        function calculateScore() {
+            // Base score with time bonus
+            const timeLeft = parseInt(document.getElementById('timeLeft').textContent);
+            return 100 + (timeLeft * 5);
+        }
+
+        function use5050() {
+            if (!lifelines.fiftyFifty) return;
+            
+            lifelines.fiftyFifty = false;
+            document.getElementById('lifeline5050').disabled = true;
+            document.getElementById('lifeline5050').classList.add('opacity-50');
+            
+            const question = currentQuiz.questions[currentQuestion];
+            const options = document.querySelectorAll('.answer-option');
+            let wrongAnswers = [];
+            
+            options.forEach((option, index) => {
+                if (index !== question.correct) {
+                    wrongAnswers.push(index);
+                }
+            });
+            
+            // Hide 2 wrong answers
+            const toHide = wrongAnswers.slice(0, 2);
+            toHide.forEach(index => {
+                options[index].style.display = 'none';
+            });
+            
+            showNotification('50-50 lifeline used! Two wrong answers removed.', 'info');
+        }
+
+        function useSkip() {
+            if (!lifelines.skip) return;
+            
+            lifelines.skip = false;
+            document.getElementById('lifelineSkip').disabled = true;
+            document.getElementById('lifelineSkip').classList.add('opacity-50');
+            
+            showNotification('Question skipped!', 'info');
+            
+            setTimeout(() => {
+                currentQuestion++;
+                displayQuestion();
+            }, 1000);
+        }
+
+        function useFreeze() {
+            if (!lifelines.freeze) return;
+            
+            lifelines.freeze = false;
+            document.getElementById('lifelineFreeze').disabled = true;
+            document.getElementById('lifelineFreeze').classList.add('opacity-50');
+            
+            clearInterval(gameTimer);
+            showNotification('Timer frozen for this question!', 'info');
+        }
+
+        function endGame() {
+            const accuracy = Math.round((gameScore / (currentQuiz.questions.length * 100)) * 100);
+            const xpGained = Math.floor(gameScore / 10);
+            
+            // Update user stats
+            currentUser.xp += xpGained;
+            currentUser.gamesPlayed++;
+            saveUserData();
+            
+            // Show results
+            showGameResults(gameScore, accuracy, xpGained);
+        }
+
+        function showGameResults(score, accuracy, xp) {
+            showScreen('resultsScreen');
+            
+            // Determine result type
+            let resultIcon, resultTitle, resultSubtitle;
+            if (accuracy >= 80) {
+                resultIcon = '<i class="fas fa-trophy text-yellow-500"></i>';
+                resultTitle = 'Excellent!';
+                resultSubtitle = 'Outstanding performance!';
+                triggerConfetti();
+            } else if (accuracy >= 60) {
+                resultIcon = '<i class="fas fa-medal text-blue-500"></i>';
+                resultTitle = 'Well Done!';
+                resultSubtitle = 'Good job completing the quiz!';
+            } else {
+                resultIcon = '<i class="fas fa-thumbs-up text-green-500"></i>';
+                resultTitle = 'Keep Practicing!';
+                resultSubtitle = 'You\'re improving with each game!';
+            }
+            
+            document.getElementById('resultIcon').innerHTML = resultIcon;
+            document.getElementById('resultTitle').textContent = resultTitle;
+            document.getElementById('resultSubtitle').textContent = resultSubtitle;
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('accuracyPercent').textContent = accuracy + '%';
+            document.getElementById('xpGained').textContent = '+' + xp;
+            
+            // Create performance chart
+            createPerformanceChart(accuracy);
+            
+            // Show ad opportunity
+            setTimeout(() => {
+                if (Math.random() > 0.5) {
+                    showAdModal();
+                }
+            }, 3000);
+        }
+
+        function createPerformanceChart(accuracy) {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Correct', 'Incorrect'],
+                    datasets: [{
+                        data: [accuracy, 100 - accuracy],
+                        backgroundColor: ['#8b5cf6', '#e5e7eb'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function triggerConfetti() {
+            const confettiContainer = document.getElementById('confetti');
+            confettiContainer.classList.remove('hidden');
+            
+            // Create confetti pieces
+            for (let i = 0; i < 50; i++) {
+                const confettiPiece = document.createElement('div');
+                confettiPiece.className = 'confetti-piece';
+                confettiPiece.style.left = Math.random() * 100 + '%';
+                confettiPiece.style.backgroundColor = ['#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#3b82f6'][Math.floor(Math.random() * 5)];
+                confettiPiece.style.animationDelay = Math.random() * 3 + 's';
+                confettiContainer.appendChild(confettiPiece);
+            }
+            
+            // Clean up after animation
+            setTimeout(() => {
+                confettiContainer.classList.add('hidden');
+                confettiContainer.innerHTML = '';
+            }, 6000);
+        }
+
+        function startQuickMatch() {
+            showNotification('Finding players...', 'info');
+            
+            // Simulate matchmaking
+            setTimeout(() => {
+                showNotification('Match found! Joining game...', 'success');
+                setTimeout(() => {
+                    startBattleGame('QM' + Math.random().toString(36).substr(2, 4).toUpperCase());
+                }, 1500);
+            }, 2000);
+        }
+
+        function joinBattleRoom() {
+            const roomCode = document.getElementById('roomCode').value.trim();
+            if (!roomCode) {
+                showNotification('Please enter a room code', 'error');
+                return;
+            }
+            
+            showNotification('Joining room ' + roomCode + '...', 'info');
+            setTimeout(() => {
+                startBattleGame(roomCode);
+            }, 1000);
+        }
+
+        function joinSpecificRoom(roomCode) {
+            showNotification('Joining room ' + roomCode + '...', 'info');
+            setTimeout(() => {
+                startBattleGame(roomCode);
+            }, 1000);
+        }
+
+        function startBattleGame(roomCode) {
+            showScreen('battleGameScreen');
+            document.getElementById('battleRoomCode').textContent = roomCode;
+            
+            // Simulate other players
+            const players = [
+                { name: currentUser.name, score: 0, answered: false },
+                { name: 'Player2', score: 0, answered: false },
+                { name: 'Player3', score: 0, answered: false },
+                { name: 'Player4', score: 0, answered: false }
+            ];
+            
+            // Start battle quiz
+            currentQuiz = {
+                questions: sampleQuestions.general.slice(0, 10),
+                players: players,
+                currentQuestion: 0
+            };
+            
+            displayBattleQuestion();
+        }
+
+        function displayBattleQuestion() {
+            if (currentQuiz.currentQuestion >= currentQuiz.questions.length) {
+                endBattleGame();
+                return;
+            }
+            
+            const question = currentQuiz.questions[currentQuiz.currentQuestion];
+            
+            document.getElementById('battleCurrentQuestion').textContent = currentQuiz.currentQuestion + 1;
+            document.getElementById('battleQuestionText').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('battleAnswerOptions');
+            optionsContainer.innerHTML = question.options.map((option, index) => `
+                <button class="battle-answer w-full p-4 text-left border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900 transition-all" 
+                        data-index="${index}" onclick="selectBattleAnswer(${index})">
+                    <span class="font-semibold">${String.fromCharCode(65 + index)}.</span> ${option}
+                </button>
+            `).join('');
+            
+            updateBattleLeaderboard();
+            startBattleTimer(15);
+        }
+
+        function startBattleTimer(seconds) {
+            let timeLeft = seconds;
+            const timerDisplay = document.getElementById('battleTimeLeft');
+            const timerCircle = document.getElementById('battleTimerCircle');
+            const circumference = 2 * Math.PI * 36;
+            
+            timerDisplay.textContent = timeLeft;
+            
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                
+                const progress = (seconds - timeLeft) / seconds;
+                const dashOffset = circumference * progress;
+                timerCircle.style.strokeDashoffset = dashOffset;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(gameTimer);
+                    battleTimeUp();
+                }
+            }, 1000);
+        }
+
+        function selectBattleAnswer(answerIndex) {
+            clearInterval(gameTimer);
+            
+            const question = currentQuiz.questions[currentQuiz.currentQuestion];
+            const isCorrect = answerIndex === question.correct;
+            const timeBonus = parseInt(document.getElementById('battleTimeLeft').textContent) * 10;
+            
+            if (isCorrect) {
+                const scoreGain = 100 + timeBonus;
+                currentQuiz.players[0].score += scoreGain;
+                showNotification(`Correct! +${scoreGain} points`, 'success');
+            } else {
+                showNotification('Incorrect!', 'error');
+            }
+            
+            // Simulate other players answering
+            simulateOtherPlayerAnswers();
+            
+            // Highlight answers
+            highlightBattleAnswers(question.correct, answerIndex);
+            
+            setTimeout(() => {
+                currentQuiz.currentQuestion++;
+                displayBattleQuestion();
+            }, 3000);
+        }
+
+        function simulateOtherPlayerAnswers() {
+            const question = currentQuiz.questions[currentQuiz.currentQuestion];
+            
+            currentQuiz.players.slice(1).forEach(player => {
+                const isCorrect = Math.random() > 0.3; // 70% chance of correct answer
+                if (isCorrect) {
+                    const timeBonus = Math.floor(Math.random() * 10) * 10;
+                    player.score += 100 + timeBonus;
+                }
+                player.answered = true;
+            });
+        }
+
+        function highlightBattleAnswers(correctIndex, selectedIndex) {
+            const options = document.querySelectorAll('.battle-answer');
+            options.forEach((option, index) => {
+                if (index === correctIndex) {
+                    option.classList.add('bg-green-500', 'text-white', 'border-green-500');
+                } else if (index === selectedIndex && selectedIndex !== correctIndex) {
+                    option.classList.add('bg-red-500', 'text-white', 'border-red-500');
+                }
+                option.disabled = true;
+            });
+        }
+
+        function battleTimeUp() {
+            showNotification('Time\'s up!', 'warning');
+            simulateOtherPlayerAnswers();
+            
+            const question = currentQuiz.questions[currentQuiz.currentQuestion];
+            const options = document.querySelectorAll('.battle-answer');
+            options[question.correct].classList.add('bg-green-500', 'text-white', 'border-green-500');
+            
+            setTimeout(() => {
+                currentQuiz.currentQuestion++;
+                displayBattleQuestion();
+            }, 3000);
+        }
+
+        function updateBattleLeaderboard() {
+            const container = document.getElementById('battleLeaderboard');
+            const sortedPlayers = [...currentQuiz.players].sort((a, b) => b.score - a.score);
+            
+            container.innerHTML = sortedPlayers.map((player, index) => `
+                <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                            index === 0 ? 'bg-yellow-500 text-white' : 
+                            index === 1 ? 'bg-gray-400 text-white' : 
+                            index === 2 ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700'
+                        }">
+                            ${index + 1}
+                        </span>
+                        <span class="font-medium ${player.name === currentUser.name ? 'text-purple-600' : 'text-gray-800 dark:text-white'}">${player.name}</span>
+                    </div>
+                    <span class="font-bold text-gray-800 dark:text-white">${player.score}</span>
+                </div>
+            `).join('');
+        }
+
+        function leaveBattle() {
+            if (confirm('Are you sure you want to leave the battle?')) {
+                clearInterval(gameTimer);
+                showScreen('battleScreen');
+                showNotification('Left the battle', 'info');
+            }
+        }
+
+        function endBattleGame() {
+            const finalPosition = currentQuiz.players.sort((a, b) => b.score - a.score).findIndex(p => p.name === currentUser.name) + 1;
+            const playerScore = currentQuiz.players.find(p => p.name === currentUser.name).score;
+            
+            let resultMessage = '';
+            let xpGain = 0;
+            
+            if (finalPosition === 1) {
+                resultMessage = '🏆 Victory! You came in 1st place!';
+                xpGain = 200;
+                triggerConfetti();
+            } else if (finalPosition <= 3) {
+                resultMessage = `🥉 Great job! You came in ${finalPosition}${finalPosition === 2 ? 'nd' : 'rd'} place!`;
+                xpGain = 100;
+            } else {
+                resultMessage = `You finished in ${finalPosition}th place. Keep practicing!`;
+                xpGain = 50;
+            }
+            
+            currentUser.xp += xpGain;
+            saveUserData();
+            
+            showNotification(resultMessage, 'success');
+            
+            setTimeout(() => {
+                showScreen('homeScreen');
+                updateUserDisplay();
+            }, 3000);
+        }
+
+        function addQuestionForm() {
+            const container = document.getElementById('questionsList');
+            const questionNumber = container.children.length + 1;
+            
+            const questionForm = document.createElement('div');
+            questionForm.className = 'question-form bg-gray-50 dark:bg-gray-700 p-4 rounded-lg';
+            questionForm.innerHTML = `
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="font-semibold text-gray-800 dark:text-white">Question ${questionNumber}</h4>
+                    <button onclick="removeQuestion(this)" class="text-red-500 hover:text-red-700">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="space-y-3">
+                    <input type="text" placeholder="Enter your question" class="question-text w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <input type="text" placeholder="Option A" class="option-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                        <input type="text" placeholder="Option B" class="option-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                        <input type="text" placeholder="Option C" class="option-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                        <input type="text" placeholder="Option D" class="option-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                    </div>
+                    <select class="correct-answer w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                        <option value="">Select correct answer</option>
+                        <option value="0">Option A</option>
+                        <option value="1">Option B</option>
+                        <option value="2">Option C</option>
+                        <option value="3">Option D</option>
+                    </select>
+                </div>
+            `;
+            
+            container.appendChild(questionForm);
+        }
+
+        function removeQuestion(button) {
+            button.closest('.question-form').remove();
+            
+            // Renumber remaining questions
+            const forms = document.querySelectorAll('.question-form');
+            forms.forEach((form, index) => {
+                const header = form.querySelector('h4');
+                header.textContent = `Question ${index + 1}`;
+            });
+        }
+
+        function saveQuiz() {
+            const title = document.getElementById('quizTitle').value.trim();
+            const category = document.getElementById('quizCategory').value;
+            const timePerQuestion = document.getElementById('questionTime').value;
+            const mode = document.getElementById('quizMode').value;
+            
+            if (!title) {
+                showNotification('Please enter a quiz title', 'error');
+                return;
+            }
+            
+            const questionForms = document.querySelectorAll('.question-form');
+            if (questionForms.length === 0) {
+                showNotification('Please add at least one question', 'error');
+                return;
+            }
+            
+            const questions = [];
+            let isValid = true;
+            
+            questionForms.forEach(form => {
+                const questionText = form.querySelector('.question-text').value.trim();
+                const options = Array.from(form.querySelectorAll('.option-input')).map(input => input.value.trim());
+                const correctAnswer = form.querySelector('.correct-answer').value;
+                
+                if (!questionText || options.some(opt => !opt) || correctAnswer === '') {
+                    isValid = false;
+                    return;
+                }
+                
+                questions.push({
+                    question: questionText,
+                    options: options,
+                    correct: parseInt(correctAnswer)
+                });
+            });
+            
+            if (!isValid) {
+                showNotification('Please fill in all question fields', 'error');
+                return;
+            }
+            
+            // Save quiz (in real app, this would go to server)
+            const quiz = {
+                id: Date.now(),
+                title,
+                category,
+                timePerQuestion: parseInt(timePerQuestion),
+                mode,
+                questions,
+                created: new Date().toISOString(),
+                plays: 0
+            };
+            
+            // Save to localStorage
+            const savedQuizzes = JSON.parse(localStorage.getItem('dimaagwalaQuizzes') || '[]');
+            savedQuizzes.push(quiz);
+            localStorage.setItem('dimaagwalaQuizzes', JSON.stringify(savedQuizzes));
+            
+            showNotification('Quiz saved successfully!', 'success');
+            showScreen('organizerScreen');
+            populateMyQuizzes();
+            
+            // Clear form
+            document.getElementById('quizTitle').value = '';
+            document.getElementById('questionsList').innerHTML = '';
+        }
+
+        function handleCSVUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csv = e.target.result;
+                    const lines = csv.split('\n').filter(line => line.trim());
+                    const questions = [];
+                    
+                    // Skip header if exists
+                    const startIndex = lines[0].toLowerCase().includes('question') ? 1 : 0;
+                    
+                    for (let i = startIndex; i < lines.length; i++) {
+                        const parts = lines[i].split(',').map(part => part.trim().replace(/"/g, ''));
+                        if (parts.length >= 6) {
+                            questions.push({
+                                question: parts[0],
+                                options: [parts[1], parts[2], parts[3], parts[4]],
+                                correct: parseInt(parts[5]) || 0
+                            });
+                        }
+                    }
+                    
+                    if (questions.length > 0) {
+                        // Auto-populate questions
+                        const container = document.getElementById('questionsList');
+                        container.innerHTML = '';
+                        
+                        questions.forEach((q, index) => {
+                            addQuestionForm();
+                            const form = container.lastElementChild;
+                            form.querySelector('.question-text').value = q.question;
+                            const optionInputs = form.querySelectorAll('.option-input');
+                            q.options.forEach((option, i) => {
+                                if (optionInputs[i]) optionInputs[i].value = option;
+                            });
+                            form.querySelector('.correct-answer').value = q.correct;
+                        });
+                        
+                        showNotification(`Imported ${questions.length} questions successfully!`, 'success');
+                    } else {
+                        showNotification('No valid questions found in CSV', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Error reading CSV file', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function hostQuiz(quizTitle) {
+            showScreen('hostQuizScreen');
+            
+            // Generate room code
+            const roomCode = 'QUIZ' + Math.random().toString(36).substr(2, 3).toUpperCase();
+            document.getElementById('hostRoomCode').textContent = roomCode;
+            document.getElementById('playerCount').textContent = '0';
+            
+            // Simulate players joining
+            let playerCount = 0;
+            const joinInterval = setInterval(() => {
+                if (playerCount < 8 && Math.random() > 0.3) {
+                    playerCount++;
+                    document.getElementById('playerCount').textContent = playerCount;
+                    showNotification(`Player ${playerCount} joined!`, 'info');
+                }
+                
+                if (playerCount >= 5 || Math.random() > 0.8) {
+                    clearInterval(joinInterval);
+                }
+            }, 2000);
+            
+            showNotification(`Quiz room ${roomCode} created! Share the code with players.`, 'success');
+        }
+
+        function endQuizSession() {
+            if (confirm('Are you sure you want to end the quiz session?')) {
+                showScreen('organizerScreen');
+                showNotification('Quiz session ended', 'info');
+            }
+        }
+
+        function playAgain() {
+            showScreen('soloScreen');
+        }
+
+        function showAdModal() {
+            document.getElementById('adModal').classList.remove('hidden');
+        }
+
+        function closeAdModal() {
+            document.getElementById('adModal').classList.add('hidden');
+        }
+
+        function watchAd() {
+            closeAdModal();
+            showNotification('Watching ad...', 'info');
+            
+            // Simulate ad watching
+            setTimeout(() => {
+                currentUser.coins += 50;
+                updateUserDisplay();
+                saveUserData();
+                showNotification('Thanks for watching! +50 coins earned', 'success');
+            }, 3000);
+        }
+
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notifications');
+            const notification = document.createElement('div');
+            
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+            
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
+            
+            notification.className = `notification ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 max-w-sm`;
+            notification.innerHTML = `
+                <i class="fas ${icons[type]}"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" class="ml-auto">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Initialize some sample data on first load
+        if (!localStorage.getItem('dimaagwalaInitialized')) {
+            localStorage.setItem('dimaagwalaInitialized', 'true');
+            // Add any initialization logic here
+        }
+    </script>
+</body>
+</html>
