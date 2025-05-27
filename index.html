@@ -235,6 +235,7 @@
                 <button id="startJourney" class="gradient-bg text-white px-6 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
                     Start My Journey
                 </button>
+                <button onclick="skipWelcome()" class="text-sm text-purple-500 mt-2 underline">Skip for Now</button>
             </div>
         </div>
 
@@ -2493,3 +2494,30 @@
             
             // Find user in battle players
             const user
+            <script>
+function closeWelcomeOverlay() {
+    document.getElementById('welcomeOverlay').classList.add('hidden');
+    showScreen('homeScreen'); // or soloScreen if you prefer
+}
+
+function skipWelcome() {
+    document.getElementById('welcomeOverlay').classList.add('hidden');
+    showScreen('homeScreen');
+}
+
+function saveUserProfile() {
+    const name = document.getElementById('profileName').value.trim();
+    const email = document.getElementById('profileEmail').value.trim();
+    const age = document.getElementById('profileAge').value;
+
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (age) user.age = age;
+
+    user.signedUp = true;
+    document.getElementById('userName').innerText = user.name;
+    closeProfileModal();
+    alert('Profile saved!');
+}
+</script>
+
