@@ -1,67 +1,254 @@
-<div id="welcomeOverlay" class="welcome-overlay hidden">
-    <div class="welcome-modal dark:bg-gray-800">
-        <div class="text-5xl mb-4 animate-bounce-slow">
-            <i class="fas fa-brain brain-logo"></i>
-        </div>
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">Welcome to Dimaagwale</h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Let's test your knowledge and challenge your mind!</p>
-        <div class="mb-4">
-            <input type="text" id="welcomeName" placeholder="Enter your name" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
-        </div>
-        <button id="startJourney" class="gradient-bg text-white px-6 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
-                    Start Playing
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dimaagwale - Quiz & Trivia Game Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-orange {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .gradient-purple {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .gradient-green {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        .gradient-red {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+        
+        .brain-logo {
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .animate-bounce-slow {
+            animation: bounce 2s infinite;
+        }
+        
+        .animate-pulse-soft {
+            animation: pulse 3s infinite;
+        }
+        
+        .confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); }
+            100% { transform: translateY(100vh) rotate(360deg); }
+        }
+        
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confetti-fall 3s linear infinite;
+        }
+        
+        .dark .dark\:bg-gray-900 {
+            background-color: #1a202c;
+        }
+        
+        .dark .dark\:bg-gray-800 {
+            background-color: #2d3748;
+        }
+        
+        .dark .dark\:text-white {
+            color: #ffffff;
+        }
+        
+        .dark .dark\:text-gray-300 {
+            color: #cbd5e0;
+        }
+        
+        .quiz-card {
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+        
+        .quiz-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        
+        .timer-ring {
+            transition: stroke-dashoffset 1s linear;
+        }
+        
+        .leaderboard-item {
+            animation: slideInRight 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        
+        @keyframes slideInRight {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .notification {
+            animation: slideInDown 0.5s ease-out;
+        }
+        
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .welcome-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .welcome-modal {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            transform: scale(0.9);
+            animation: welcomePopIn 0.5s ease-out forwards;
+        }
+        
+        @keyframes welcomePopIn {
+            to {
+                transform: scale(1);
+            }
+        }
+        
+        .fixed-home-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 50;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .exam-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            margin: 0 auto;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div id="app" class="min-h-screen">
+        <!-- Persistent Home Button -->
+        <button id="fixedHomeButton" onclick="showScreen('homeScreen')" class="fixed-home-btn gradient-bg text-white shadow-lg hidden">
+            <i class="fas fa-home text-xl"></i>
+        </button>
+    
+        <!-- Navigation Header -->
+        <nav class="gradient-bg text-white shadow-lg sticky top-0 z-50">
+            <div class="container mx-auto px-4 py-3">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-brain text-2xl brain-logo"></i>
+                        <h1 class="text-2xl font-bold">Dimaagwale</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button id="themeToggle" class="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-all">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-coins text-yellow-300"></i>
+                            <span id="userCoins">1000</span>
+                        </div>
+                        <button id="userProfile" class="flex items-center space-x-2 bg-white bg-opacity-20 rounded-full px-3 py-1">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L13.5 2.5L16.17 5.17L10.5 10.84L15.16 15.5L17.5 13.16L20.17 15.84L21.5 14.34L19 11.84V9H21Z'/%3E%3C/svg%3E" alt="User" class="w-6 h-6 rounded-full">
+                            <span id="userName">Player</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Welcome Modal -->
+        <div id="welcomeOverlay" class="welcome-overlay hidden">
+            <div class="welcome-modal dark:bg-gray-800">
+                <div class="text-5xl mb-4 animate-bounce-slow">
+                    <i class="fas fa-brain brain-logo"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">Welcome to Dimaagwale</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">Let's test your knowledge and challenge your mind!</p>
+                <div class="mb-4">
+                    <input type="text" id="welcomeName" placeholder="Enter your name" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <button id="startJourney" class="gradient-bg text-white px-6 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                    Start My Journey
                 </button>
             </div>
         </div>
 
-        <!-- Profile Modal -->
-        <div id="profileModal" class="welcome-overlay hidden">
-            <div class="welcome-modal dark:bg-gray-800">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Your Profile</h2>
-                    <button onclick="closeProfileModal()" class="text-gray-500 hover:text-gray-700">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <p class="text-gray-600 dark:text-gray-300 mb-6">Save your progress and track your achievements!</p>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
-                        <input type="text" id="profileName" placeholder="Your name" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-                        <input type="email" id="profileEmail" placeholder="Your email" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Age (Optional)</label>
-                        <input type="number" id="profileAge" placeholder="Your age" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    </div>
-                </div>
-                
-                <div class="mt-6 flex justify-between">
-                    <button onclick="closeProfileModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        Skip for Now
-                    </button>
-                    <button id="saveProfile" class="gradient-bg text-white px-6 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
-                        Save Profile
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Profile Sign-up Prompt (Enhanced) -->
-        <div id="profilePrompt" class="fixed top-16 right-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg max-w-xs notification hidden profile-prompt pulse-animation">
+        <!-- Profile Sign-up Prompt -->
+        <div id="profilePrompt" class="fixed top-16 right-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg max-w-xs notification hidden">
             <div class="flex items-start">
                 <div class="flex-shrink-0 text-purple-500">
                     <i class="fas fa-user-circle text-2xl"></i>
                 </div>
                 <div class="ml-3">
-                    <h3 class="text-sm font-medium text-gray-800 dark:text-white">Save your progress?</h3>
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Create a profile to track your achievements and compete on leaderboards!</p>
+                    <h3 class="text-sm font-medium text-gray-800 dark:text-white">Want to save your progress?</h3>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Sign up to track all your quizzes and achievements!</p>
                     <div class="mt-2">
-                        <button onclick="openProfileModal()" class="text-xs text-white bg-purple-500 px-3 py-1 rounded-full">Create Profile</button>
+                        <button onclick="openProfileModal()" class="text-xs text-white bg-purple-500 px-3 py-1 rounded-full">Sign Up</button>
                     </div>
                 </div>
                 <button onclick="closeProfilePrompt()" class="ml-4 text-gray-400 hover:text-gray-500">
@@ -295,49 +482,688 @@
 
             <!-- Solo Game Screen -->
             <div id="soloGameScreen" class="screen hidden">
-                <!-- Game content will be loaded dynamically -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center">
+                        <button onclick="showScreen('soloScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                            <i class="fas fa-times mr-2"></i>Quit
+                        </button>
+                        <div class="flex items-center space-x-4">
+                            <div class="text-center">
+                                <p class="text-sm text-gray-600 dark:text-gray-300">Question</p>
+                                <p class="text-xl font-bold text-gray-800 dark:text-white"><span id="currentQuestion">1</span>/<span id="totalQuestions">10</span></p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm text-gray-600 dark:text-gray-300">Score</p>
+                                <p class="text-xl font-bold text-purple-600" id="currentScore">0</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm text-gray-600 dark:text-gray-300">Errors</p>
+                                <p class="text-xl font-bold text-red-500" id="errorsLeft">2</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timer Circle -->
+                <div class="text-center mb-6">
+                    <div class="relative inline-block">
+                        <svg class="w-20 h-20 transform -rotate-90">
+                            <circle cx="40" cy="40" r="36" stroke="#e5e7eb" stroke-width="8" fill="transparent"></circle>
+                            <circle id="timerCircle" cx="40" cy="40" r="36" stroke="#8b5cf6" stroke-width="8" fill="transparent" 
+                                stroke-dasharray="226" stroke-dashoffset="0" class="timer-ring"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="timeLeft" class="text-2xl font-bold text-purple-600">15</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+                    <h3 id="questionText" class="text-xl font-bold text-gray-800 dark:text-white mb-6">Loading question...</h3>
+                    <div id="answerOptions" class="space-y-3">
+                        <!-- Answer options will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Lifelines -->
+                <div class="flex justify-center space-x-4 mb-6">
+                    <button id="lifeline5050" class="lifeline-btn bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-divide mr-2"></i>50-50
+                    </button>
+                    <button id="lifelineSkip" class="lifeline-btn bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors">
+                        <i class="fas fa-forward mr-2"></i>Skip
+                    </button>
+                </div>
             </div>
 
             <!-- Battle Mode Screen -->
             <div id="battleScreen" class="screen hidden">
-                <!-- Battle mode content will be loaded dynamically -->
+                <div class="mb-6">
+                    <button onclick="showScreen('homeScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                    </button>
+                </div>
+
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Battle Mode</h2>
+                    <p class="text-gray-600 dark:text-gray-300">Compete with players from around the world!</p>
+                </div>
+
+                <!-- Join Options -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                            <i class="fas fa-plus-circle text-purple-500 mr-2"></i>
+                            Create Quiz Battle
+                        </h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Create a quiz room for others to join</p>
+                        <div class="space-y-3 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                                <select id="battleCategory" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <option value="">Select a category</option>
+                                    <option value="general">General Knowledge</option>
+                                    <option value="sports">Sports</option>
+                                    <option value="movies">Movies</option>
+                                    <option value="history">History</option>
+                                    <option value="finance">Finance</option>
+                                    <option value="aptitude">Aptitude</option>
+                                    <option value="science">Science</option>
+                                    <option value="technology">Technology</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Difficulty</label>
+                                <select id="battleDifficulty" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <option value="">Select difficulty</option>
+                                    <option value="easy">Easy</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="hard">Hard</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Players</label>
+                                <select id="battlePlayers" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <option value="2">2 Players</option>
+                                    <option value="4">4 Players</option>
+                                    <option value="8">8 Players</option>
+                                    <option value="0">Open for all</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button id="createBattle" class="gradient-bg text-white w-full py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                            <i class="fas fa-plus mr-2"></i>Create Battle
+                        </button>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                            <i class="fas fa-key text-orange-500 mr-2"></i>
+                            Join Quiz Battle
+                        </h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Enter a room code to join a specific game</p>
+                        <div class="flex space-x-2">
+                            <input id="roomCode" type="text" placeholder="Enter room code" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <button id="joinRoom" class="gradient-orange text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                                Join
+                            </button>
+                        </div>
+                        <div class="mt-6">
+                            <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="fas fa-random text-green-500 mr-2"></i>
+                                Quick Match
+                            </h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Get matched with players of similar skill level</p>
+                            <button id="quickMatch" class="gradient-green text-white w-full py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                                <i class="fas fa-bolt mr-2"></i>Find Match
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Rooms -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                        <i class="fas fa-door-open text-green-500 mr-2"></i>
+                        Active Rooms
+                    </h3>
+                    <div id="activeRooms" class="space-y-3">
+                        <!-- Active rooms will be populated here -->
+                    </div>
+                </div>
             </div>
 
             <!-- Aspirants Corner Screen -->
             <div id="aspirantsScreen" class="screen hidden">
-                <!-- Aspirants content will be loaded dynamically -->
+                <div class="mb-6">
+                    <button onclick="showScreen('homeScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                    </button>
+                </div>
+
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Aspirants Corner</h2>
+                    <p class="text-gray-600 dark:text-gray-300">Prepare for competitive exams with targeted quizzes!</p>
+                </div>
+
+                <!-- Exam Categories Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mb-8">
+                    <div class="exam-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer" data-exam="upsc">
+                        <div class="exam-icon bg-red-100 text-red-500">
+                            <i class="fas fa-landmark"></i>
+                        </div>
+                        <h3 class="font-bold text-center text-gray-800 dark:text-white">UPSC</h3>
+                        <p class="text-xs text-center text-gray-500 mt-1">Civil Services</p>
+                    </div>
+
+                    <div class="exam-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer" data-exam="cat">
+                        <div class="exam-icon bg-blue-100 text-blue-500">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="font-bold text-center text-gray-800 dark:text-white">CAT</h3>
+                        <p class="text-xs text-center text-gray-500 mt-1">MBA Entrance</p>
+                    </div>
+
+                    <div class="exam-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer" data-exam="bank">
+                        <div class="exam-icon bg-green-100 text-green-500">
+                            <i class="fas fa-university"></i>
+                        </div>
+                        <h3 class="font-bold text-center text-gray-800 dark:text-white">IBPS</h3>
+                        <p class="text-xs text-center text-gray-500 mt-1">Bank Exams</p>
+                    </div>
+
+                    <div class="exam-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer" data-exam="ssc">
+                        <div class="exam-icon bg-yellow-100 text-yellow-500">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <h3 class="font-bold text-center text-gray-800 dark:text-white">SSC</h3>
+                        <p class="text-xs text-center text-gray-500 mt-1">Staff Selection</p>
+                    </div>
+
+                    <div class="exam-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer" data-exam="railway">
+                        <div class="exam-icon bg-purple-100 text-purple-500">
+                            <i class="fas fa-train"></i>
+                        </div>
+                        <h3 class="font-bold text-center text-gray-800 dark:text-white">Railway</h3>
+                        <p class="text-xs text-center text-gray-500 mt-1">RRB & RRC</p>
+                    </div>
+
+                    <div class="exam-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer" data-exam="gmat">
+                        <div class="exam-icon bg-indigo-100 text-indigo-500">
+                            <i class="fas fa-globe-americas"></i>
+                        </div>
+                        <h3 class="font-bold text-center text-gray-800 dark:text-white">GMAT</h3>
+                        <p class="text-xs text-center text-gray-500 mt-1">Business Schools</p>
+                    </div>
+
+                    <div class="exam-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer" data-exam="gate">
+                        <div class="exam-icon bg-pink-100 text-pink-500">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                        <h3 class="font-bold text-center text-gray-800 dark:text-white">GATE</h3>
+                        <p class="text-xs text-center text-gray-500 mt-1">Engineering</p>
+                    </div>
+
+                    <div class="exam-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer" data-exam="neet">
+                        <div class="exam-icon bg-teal-100 text-teal-500">
+                            <i class="fas fa-stethoscope"></i>
+                        </div>
+                        <h3 class="font-bold text-center text-gray-800 dark:text-white">NEET</h3>
+                        <p class="text-xs text-center text-gray-500 mt-1">Medical Entrance</p>
+                    </div>
+                </div>
+
+                <!-- Selected Exam Details -->
+                <div id="examDetails" class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-8 hidden">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 id="examTitle" class="text-2xl font-bold text-gray-800 dark:text-white">UPSC Civil Services</h3>
+                            <p id="examDescription" class="text-gray-600 dark:text-gray-300 mt-1">Prepare for preliminary and main examinations</p>
+                        </div>
+                        <button onclick="hideExamDetails()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        <div class="bg-gray-100 dark:bg-gray-700 rounded-xl p-5 hover:shadow-md transition-all cursor-pointer" onclick="startExamPractice('prelims')">
+                            <h4 class="font-bold text-gray-800 dark:text-white mb-2">Prelims Level</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Foundation questions to build basic understanding</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-500"><i class="fas fa-question-circle mr-1"></i> 10 questions</span>
+                                <i class="fas fa-arrow-right text-purple-500"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-100 dark:bg-gray-700 rounded-xl p-5 hover:shadow-md transition-all cursor-pointer" onclick="startExamPractice('mains')">
+                            <h4 class="font-bold text-gray-800 dark:text-white mb-2">Mains Level</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Advanced questions for thorough preparation</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-500"><i class="fas fa-question-circle mr-1"></i> 15 questions</span>
+                                <i class="fas fa-arrow-right text-purple-500"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Practice Stats -->
+                    <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                        <h4 class="font-bold text-gray-800 dark:text-white mb-3">Your Practice Stats</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="text-center">
+                                <p class="text-sm text-gray-500">Total Attempted</p>
+                                <p class="text-xl font-bold text-purple-600">35</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm text-gray-500">Avg. Score</p>
+                                <p class="text-xl font-bold text-green-600">76%</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm text-gray-500">Time Spent</p>
+                                <p class="text-xl font-bold text-blue-600">2.5 hrs</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm text-gray-500">Rank</p>
+                                <p class="text-xl font-bold text-yellow-600">Top 15%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trending Questions -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                        <i class="fas fa-fire text-orange-500 mr-2"></i>
+                        Trending Topics
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <p class="font-medium text-gray-800 dark:text-white">Current Affairs: Elections & Politics</p>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-xs text-gray-500">Updated 2 days ago</span>
+                                <button class="text-xs bg-purple-500 text-white px-2 py-1 rounded">Practice</button>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <p class="font-medium text-gray-800 dark:text-white">Economy: Budget & Financial Policies</p>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-xs text-gray-500">Updated 5 days ago</span>
+                                <button class="text-xs bg-purple-500 text-white px-2 py-1 rounded">Practice</button>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <p class="font-medium text-gray-800 dark:text-white">Science: Climate Change & Sustainability</p>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-xs text-gray-500">Updated 1 week ago</span>
+                                <button class="text-xs bg-purple-500 text-white px-2 py-1 rounded">Practice</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Battle Game Screen -->
+            <div id="battleGameScreen" class="screen hidden">
+                <div class="mb-6">
+                    <div class="flex justify-between items-center">
+                        <button onclick="leaveBattle()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                            <i class="fas fa-door-open mr-2"></i>Leave Battle
+                        </button>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Room Code</p>
+                            <p class="text-xl font-bold text-purple-600" id="battleRoomCode">ABC123</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Question</p>
+                            <p class="text-xl font-bold text-gray-800 dark:text-white"><span id="battleCurrentQuestion">1</span>/10</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Leaderboard -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-3">
+                        <i class="fas fa-trophy text-yellow-500 mr-2"></i>
+                        Live Rankings
+                    </h3>
+                    <div id="battleLeaderboard" class="space-y-2">
+                        <!-- Battle leaderboard will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Timer and Question -->
+                <div class="text-center mb-6">
+                    <div class="relative inline-block">
+                        <svg class="w-20 h-20 transform -rotate-90">
+                            <circle cx="40" cy="40" r="36" stroke="#e5e7eb" stroke-width="8" fill="transparent"></circle>
+                            <circle id="battleTimerCircle" cx="40" cy="40" r="36" stroke="#f59e0b" stroke-width="8" fill="transparent" 
+                                stroke-dasharray="226" stroke-dashoffset="0" class="timer-ring"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="battleTimeLeft" class="text-2xl font-bold text-orange-600">15</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+                    <h3 id="battleQuestionText" class="text-xl font-bold text-gray-800 dark:text-white mb-6">Loading question...</h3>
+                    <div id="battleAnswerOptions" class="space-y-3">
+                        <!-- Battle answer options will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Organizer Screen -->
+            <div id="organizerScreen" class="screen hidden">
+                <div class="mb-6">
+                    <button onclick="showScreen('homeScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                    </button>
+                </div>
+
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Create & Host Quiz</h2>
+                    <p class="text-gray-600 dark:text-gray-300">Design your own quiz and invite friends to play!</p>
+                </div>
+
+                <!-- Quiz Creation Options -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                            <i class="fas fa-edit text-blue-500 mr-2"></i>
+                            Create Manually
+                        </h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Add questions one by one with custom options</p>
+                        <button onclick="showScreen('createQuizScreen')" class="gradient-bg text-white w-full py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                            <i class="fas fa-plus mr-2"></i>Start Creating
+                        </button>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                            <i class="fas fa-upload text-green-500 mr-2"></i>
+                            Upload CSV/Excel
+                        </h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Import questions from a spreadsheet file</p>
+                        <input type="file" id="csvUpload" accept=".csv,.xlsx,.xls" class="hidden">
+                        <button onclick="document.getElementById('csvUpload').click()" class="gradient-purple text-white w-full py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                            <i class="fas fa-file-upload mr-2"></i>Upload File
+                        </button>
+                    </div>
+                </div>
+
+                <!-- My Quizzes -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                        <i class="fas fa-list text-purple-500 mr-2"></i>
+                        My Quizzes
+                    </h3>
+                    <div id="myQuizzes" class="space-y-3">
+                        <!-- User's quizzes will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Premium Features -->
+                <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-6 shadow-lg text-white">
+                    <h3 class="text-xl font-bold mb-2">
+                        <i class="fas fa-crown mr-2"></i>
+                        Premium Organizer Features
+                    </h3>
+                    <p class="mb-4">Unlock unlimited quizzes, advanced analytics, and custom branding!</p>
+                    <div class="flex space-x-4">
+                        <button class="bg-white text-purple-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition-colors">
+                            49/month
+                        </button>
+                        <button class="bg-white text-purple-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition-colors">
+                            10/quiz
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Quiz Screen -->
+            <div id="createQuizScreen" class="screen hidden">
+                <div class="mb-6">
+                    <button onclick="showScreen('organizerScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Organizer
+                    </button>
+                </div>
+
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Create Your Quiz</h2>
+                    <p class="text-gray-600 dark:text-gray-300">Design engaging questions for your participants</p>
+                </div>
+
+                <!-- Quiz Settings -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Quiz Settings</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quiz Title</label>
+                            <input id="quizTitle" type="text" placeholder="Enter quiz title" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
+                            <select id="quizCategory" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="general">General Knowledge</option>
+                                <option value="sports">Sports</option>
+                                <option value="movies">Movies</option>
+                                <option value="history">History</option>
+                                <option value="finance">Finance</option>
+                                <option value="aptitude">Aptitude</option>
+                                <option value="science">Science</option>
+                                <option value="technology">Technology</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Time per Question (seconds)</label>
+                            <input id="questionTime" type="number" value="15" min="5" max="60" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quiz Mode</label>
+                            <select id="quizMode" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="auto">Auto-advance</option>
+                                <option value="manual">Manual control</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question Builder -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white">Questions</h3>
+                        <button id="addQuestion" class="gradient-bg text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
+                            <i class="fas fa-plus mr-2"></i>Add Question
+                        </button>
+                    </div>
+                    <div id="questionsList" class="space-y-4">
+                        <!-- Questions will be added here -->
+                    </div>
+                </div>
+
+                <!-- Save Quiz -->
+                <div class="text-center">
+                    <button id="saveQuiz" class="gradient-bg text-white px-8 py-3 rounded-lg text-xl font-bold hover:opacity-90 transition-opacity">
+                        <i class="fas fa-save mr-2"></i>Save Quiz
+                    </button>
+                </div>
             </div>
 
             <!-- Leaderboard Screen -->
             <div id="leaderboardScreen" class="screen hidden">
-                <!-- Leaderboard content will be loaded dynamically -->
+                <div class="mb-6">
+                    <button onclick="showScreen('homeScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                    </button>
+                </div>
+
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+                        <i class="fas fa-trophy text-yellow-500 mr-2"></i>
+                        Global Leaderboard
+                    </h2>
+                    <p class="text-gray-600 dark:text-gray-300">Top players from around the world</p>
+                </div>
+
+                <!-- Leaderboard Filters -->
+                <div class="flex justify-center space-x-4 mb-6">
+                    <button class="leaderboard-filter bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors" data-filter="all">
+                        All Time
+                    </button>
+                    <button class="leaderboard-filter bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors" data-filter="monthly">
+                        This Month
+                    </button>
+                    <button class="leaderboard-filter bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors" data-filter="weekly">
+                        This Week
+                    </button>
+                </div>
+
+                <!-- Top 3 Podium -->
+                <div class="flex justify-center items-end space-x-4 mb-8">
+                    <!-- 2nd Place -->
+                    <div class="text-center">
+                        <div class="bg-gradient-to-t from-gray-400 to-gray-500 w-20 h-16 rounded-t-lg flex items-end justify-center">
+                            <span class="text-white font-bold text-lg mb-2">2</span>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg mt-2 w-32">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='%236b7280'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L13.5 2.5L16.17 5.17L10.5 10.84L15.16 15.5L17.5 13.16L20.17 15.84L21.5 14.34L19 11.84V9H21Z'/%3E%3C/svg%3E" alt="Player 2" class="w-12 h-12 mx-auto mb-2 rounded-full">
+                            <p class="font-bold text-sm text-gray-800 dark:text-white">Sarah M.</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-300">8,542 XP</p>
+                        </div>
+                    </div>
+
+                    <!-- 1st Place -->
+                    <div class="text-center">
+                        <div class="bg-gradient-to-t from-yellow-400 to-yellow-500 w-24 h-20 rounded-t-lg flex items-end justify-center">
+                            <span class="text-white font-bold text-xl mb-2">1</span>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg mt-2 w-36">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 24 24' fill='%23f59e0b'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L13.5 2.5L16.17 5.17L10.5 10.84L15.16 15.5L17.5 13.16L20.17 15.84L21.5 14.34L19 11.84V9H21Z'/%3E%3C/svg%3E" alt="Player 1" class="w-14 h-14 mx-auto mb-2 rounded-full">
+                            <p class="font-bold text-gray-800 dark:text-white">Alex K.</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">12,890 XP</p>
+                            <div class="flex justify-center mt-1">
+                                <i class="fas fa-crown text-yellow-500"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3rd Place -->
+                    <div class="text-center">
+                        <div class="bg-gradient-to-t from-orange-400 to-orange-500 w-16 h-12 rounded-t-lg flex items-end justify-center">
+                            <span class="text-white font-bold mb-1">3</span>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg mt-2 w-28">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='%236b7280'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L13.5 2.5L16.17 5.17L10.5 10.84L15.16 15.5L17.5 13.16L20.17 15.84L21.5 14.34L19 11.84V9H21Z'/%3E%3C/svg%3E" alt="Player 3" class="w-10 h-10 mx-auto mb-2 rounded-full">
+                            <p class="font-bold text-xs text-gray-800 dark:text-white">Michael P.</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-300">7,215 XP</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leaderboard List -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <div id="leaderboardList" class="space-y-3">
+                        <!-- Leaderboard entries will be populated here -->
+                    </div>
+                </div>
             </div>
-            
-            <!-- Organizer Screen -->
-            <div id="organizerScreen" class="screen hidden">
-                <!-- Organizer content will be loaded dynamically -->
+
+            <!-- Game Results Screen -->
+            <div id="gameResultsScreen" class="screen hidden">
+                <div class="text-center mb-8">
+                    <div class="text-6xl mb-4" id="resultIcon">
+                        <i class="fas fa-trophy text-yellow-500"></i>
+                    </div>
+                    <h2 class="text-4xl font-bold text-gray-800 dark:text-white mb-2" id="resultTitle">Great Job!</h2>
+                    <p class="text-xl text-gray-600 dark:text-gray-300" id="resultMessage">You've completed the quiz</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 dark:text-gray-300">Final Score</p>
+                                <p class="text-2xl font-bold text-purple-600" id="finalScore">850</p>
+                            </div>
+                            <i class="fas fa-star text-3xl text-yellow-500"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 dark:text-gray-300">Accuracy</p>
+                                <p class="text-2xl font-bold text-blue-600" id="finalAccuracy">80%</p>
+                            </div>
+                            <i class="fas fa-bullseye text-3xl text-blue-500"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 dark:text-gray-300">XP Gained</p>
+                                <p class="text-2xl font-bold text-green-600" id="xpGained">+120</p>
+                            </div>
+                            <i class="fas fa-level-up-alt text-3xl text-green-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Chart -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-8">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Performance</h3>
+                    <canvas id="performanceChart" height="200"></canvas>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap justify-center gap-4">
+                    <button onclick="playAgain()" class="gradient-bg text-white px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                        <i class="fas fa-redo-alt mr-2"></i>Play Again
+                    </button>
+                    <button onclick="showScreen('homeScreen')" class="bg-gray-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-home mr-2"></i>Back to Home
+                    </button>
+                    <button onclick="shareResults()" class="bg-blue-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-share-alt mr-2"></i>Share Results
+                    </button>
+                </div>
             </div>
         </main>
     </div>
 
+    <!-- User Profile Modal -->
+    <div id="profileModal" class="welcome-overlay hidden">
+        <div class="welcome-modal dark:bg-gray-800">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Your Profile</h3>
+                <button onclick="closeProfileModal()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Name</label>
+                    <input id="profileName" type="text" placeholder="Your name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                    <input id="profileEmail" type="email" placeholder="Your email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Age (Optional)</label>
+                    <input id="profileAge" type="number" min="13" max="100" placeholder="Your age" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <button onclick="saveUserProfile()" class="gradient-bg text-white w-full py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                    <i class="fas fa-save mr-2"></i>Save Profile
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
     <script>
-        // Global variables
-        let currentScreen = 'homeScreen';
-        let selectedCategory = null;
-        let selectedDifficulty = null;
-        let gameQuestions = [];
-        let currentQuestion = 0;
-        let score = 0;
-        let answeredCorrectly = 0;
-        let totalAnswered = 0;
-        let errorsLeft = 2;
-        let lifelinesUsed = {
-            '50-50': false,
-            'skip': false
-        };
-        let darkMode = false;
-        
-        // User object - with minimal required info by default
+        // User object to store user data
         let user = {
             name: 'Player',
             email: '',
@@ -347,134 +1173,474 @@
             rank: 'Scholar',
             winRate: '78%',
             signedUp: false,
-            settings: {theme: 'light'}
+            settings: {
+                theme: 'light'
+            }
+        };
+
+        // Game state variables
+        let currentScreen = 'homeScreen';
+        let selectedCategory = null;
+        let selectedDifficulty = null;
+        let selectedExam = null;
+        let selectedExamLevel = null;
+        let currentQuestion = 0;
+        let score = 0;
+        let timer = null;
+        let timeLeft = 15;
+        let gameQuestions = [];
+        let answeredCorrectly = 0;
+        let totalAnswered = 0;
+        let errorsLeft = 2;
+        let lifelinesUsed = {
+            '50-50': false,
+            'skip': false
         };
         
-        // Sample top players data
-        const topPlayersData = [
-            { name: "QuizMaster", xp: 12450, rank: "Genius", avatar: "👑" },
-            { name: "BrainWave", xp: 10280, rank: "Expert", avatar: "🧠" },
-            { name: "QuizWiz", xp: 9870, rank: "Scholar", avatar: "🔮" },
-            { name: "KnowItAll", xp: 8240, rank: "Master", avatar: "🌟" }
-        ];
+        // Battle mode variables
+        let battleRoomCode = '';
+        let battlePlayers = [];
         
-        // Sample question data
+        // Sample questions data (updated to include 8 categories and difficulty levels)
         const questionsData = {
             general: {
                 easy: [
-                    {
+                    { 
                         question: "What is the capital of France?",
-                        options: ["London", "Berlin", "Paris", "Madrid"],
-                        correct: 2
+                        options: ["Paris", "London", "Berlin", "Madrid"],
+                        correct: 0
                     },
                     {
                         question: "Which planet is known as the Red Planet?",
-                        options: ["Venus", "Mars", "Jupiter", "Saturn"],
+                        options: ["Venus", "Jupiter", "Mars", "Saturn"],
+                        correct: 2
+                    },
+                    // More easy general knowledge questions...
+                ],
+                medium: [
+                    {
+                        question: "In which year did World War II end?",
+                        options: ["1943", "1945", "1947", "1950"],
                         correct: 1
                     },
                     {
                         question: "Who painted the Mona Lisa?",
-                        options: ["Pablo Picasso", "Vincent van Gogh", "Leonardo da Vinci", "Michelangelo"],
+                        options: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Claude Monet"],
                         correct: 2
-                    }
-                    // More questions would be added here
-                ],
-                medium: [
-                    {
-                        question: "What year did World War II end?",
-                        options: ["1943", "1944", "1945", "1946"],
-                        correct: 2
-                    }
-                    // More questions would be added here
+                    },
+                    // More medium general knowledge questions...
                 ],
                 hard: [
                     {
-                        question: "What is the chemical symbol for gold?",
-                        options: ["Go", "Gd", "Au", "Ag"],
+                        question: "What is the chemical symbol for tungsten?",
+                        options: ["Tg", "Tu", "Tn", "W"],
+                        correct: 3
+                    },
+                    {
+                        question: "Which country has the longest coastline in the world?",
+                        options: ["Russia", "Australia", "Canada", "Indonesia"],
                         correct: 2
-                    }
-                    // More questions would be added here
+                    },
+                    // More hard general knowledge questions...
                 ]
             },
-            // More categories would be defined here
-            sports: { easy: [], medium: [], hard: [] },
-            movies: { easy: [], medium: [], hard: [] },
-            history: { easy: [], medium: [], hard: [] },
-            finance: { easy: [], medium: [], hard: [] },
-            aptitude: { easy: [], medium: [], hard: [] },
-            science: { easy: [], medium: [], hard: [] },
-            technology: { easy: [], medium: [], hard: [] }
+            sports: {
+                // Similar structure for sports questions...
+                easy: [
+                    {
+                        question: "In which sport would you perform a slam dunk?",
+                        options: ["Football", "Basketball", "Tennis", "Golf"],
+                        correct: 1
+                    }
+                    // More easy sports questions
+                ],
+                medium: [
+                    {
+                        question: "Which country won the FIFA World Cup in 2018?",
+                        options: ["Brazil", "Germany", "Argentina", "France"],
+                        correct: 3
+                    }
+                    // More medium sports questions
+                ],
+                hard: [
+                    {
+                        question: "Who holds the record for the most Olympic gold medals?",
+                        options: ["Usain Bolt", "Michael Phelps", "Simone Biles", "Carl Lewis"],
+                        correct: 1
+                    }
+                    // More hard sports questions
+                ]
+            },
+            movies: {
+                // Movies questions by difficulty
+                easy: [
+                    {
+                        question: "Who played the character of Harry Potter in the movie series?",
+                        options: ["Daniel Radcliffe", "Rupert Grint", "Tom Felton", "Emma Watson"],
+                        correct: 0
+                    }
+                ],
+                medium: [
+                    {
+                        question: "Which movie won the Best Picture Oscar in 2020?",
+                        options: ["1917", "Joker", "Parasite", "Once Upon a Time in Hollywood"],
+                        correct: 2
+                    }
+                ],
+                hard: [
+                    {
+                        question: "Who directed the 1941 film 'Citizen Kane'?",
+                        options: ["Alfred Hitchcock", "Orson Welles", "John Ford", "Howard Hawks"],
+                        correct: 1
+                    }
+                ]
+            },
+            history: {
+                // History questions by difficulty
+                easy: [
+                    {
+                        question: "Who was the first President of the United States?",
+                        options: ["Thomas Jefferson", "John Adams", "George Washington", "Abraham Lincoln"],
+                        correct: 2
+                    }
+                ],
+                medium: [
+                    {
+                        question: "The Renaissance period began in which country?",
+                        options: ["France", "England", "Italy", "Spain"],
+                        correct: 2
+                    }
+                ],
+                hard: [
+                    {
+                        question: "The Treaty of Tordesillas was signed in 1494 between which two countries?",
+                        options: ["England and France", "Spain and Portugal", "Italy and Greece", "Russia and Sweden"],
+                        correct: 1
+                    }
+                ]
+            },
+            finance: {
+                // Finance questions by difficulty
+                easy: [
+                    {
+                        question: "What does GDP stand for?",
+                        options: ["Gross Domestic Product", "General Development Plan", "Global Distribution Process", "Government Debt Program"],
+                        correct: 0
+                    }
+                ],
+                medium: [
+                    {
+                        question: "What is a bear market?",
+                        options: ["A market where stocks are rising", "A market where stocks are falling", "A market for trading bear commodities", "A marketplace for wildlife trading"],
+                        correct: 1
+                    }
+                ],
+                hard: [
+                    {
+                        question: "Which economic concept states that as income rises, the proportion of income spent on food falls?",
+                        options: ["Giffen's Paradox", "Engel's Law", "Pareto Principle", "Say's Law"],
+                        correct: 1
+                    }
+                ]
+            },
+            aptitude: {
+                // Aptitude questions by difficulty
+                easy: [
+                    {
+                        question: "If 5x + 3 = 18, what is x?",
+                        options: ["2", "3", "4", "5"],
+                        correct: 1
+                    }
+                ],
+                medium: [
+                    {
+                        question: "A train travels 300 km in 4 hours. What is its speed in meters per second?",
+                        options: ["20.83 m/s", "75 m/s", "208.3 m/s", "120 m/s"],
+                        correct: 0
+                    }
+                ],
+                hard: [
+                    {
+                        question: "If a^2 + b^2 = 25 and ab = 12, what is the value of a + b?",
+                        options: ["1", "5", "7", "13"],
+                        correct: 2
+                    }
+                ]
+            },
+            science: {
+                // Science questions by difficulty
+                easy: [
+                    {
+                        question: "What is the chemical symbol for water?",
+                        options: ["H2O", "CO2", "O2", "N2"],
+                        correct: 0
+                    }
+                ],
+                medium: [
+                    {
+                        question: "Which part of the human body produces insulin?",
+                        options: ["Liver", "Kidney", "Pancreas", "Spleen"],
+                        correct: 2
+                    }
+                ],
+                hard: [
+                    {
+                        question: "What is the half-life of Carbon-14?",
+                        options: ["1,460 years", "5,730 years", "10,730 years", "14,000 years"],
+                        correct: 1
+                    }
+                ]
+            },
+            technology: {
+                // Technology questions by difficulty
+                easy: [
+                    {
+                        question: "Which company developed the iPhone?",
+                        options: ["Samsung", "Google", "Apple", "Microsoft"],
+                        correct: 2
+                    }
+                ],
+                medium: [
+                    {
+                        question: "What does CPU stand for?",
+                        options: ["Central Processing Unit", "Computer Personal Unit", "Central Program Utility", "Core Processing Unit"],
+                        correct: 0
+                    }
+                ],
+                hard: [
+                    {
+                        question: "Which programming language was developed by James Gosling at Sun Microsystems?",
+                        options: ["Python", "Java", "C++", "Ruby"],
+                        correct: 1
+                    }
+                ]
+            }
         };
         
+        // Sample exam questions for Aspirants Corner
+        const examQuestionsData = {
+            upsc: {
+                prelims: [
+                    {
+                        question: "Which Article of the Indian Constitution abolishes untouchability?",
+                        options: ["Article 14", "Article 15", "Article 17", "Article 21"],
+                        correct: 2
+                    },
+                    // More UPSC prelims questions...
+                ],
+                mains: [
+                    {
+                        question: "Critically analyze the impact of Green Revolution on Indian agriculture and society.",
+                        options: ["Increased food production but created regional disparities", "Only benefited large farmers", "Completely eliminated food insecurity", "Had no environmental impact"],
+                        correct: 0
+                    },
+                    // More UPSC mains questions...
+                ]
+            },
+            cat: {
+                prelims: [
+                    {
+                        question: "If a^2 + b^2 = 25 and ab = 12, what is the value of (a + b)^2?",
+                        options: ["1", "25", "37", "49"],
+                        correct: 3
+                    },
+                    // More CAT prelims questions...
+                ],
+                mains: [
+                    {
+                        question: "The profit earned by a company in 2020 is 25% more than that in 2019. If the profit in 2019 was Rs. 16 lakhs, what was the profit in 2020?",
+                        options: ["Rs. 18 lakhs", "Rs. 20 lakhs", "Rs. 24 lakhs", "Rs. 32 lakhs"],
+                        correct: 1
+                    },
+                    // More CAT mains questions...
+                ]
+            },
+            // More exam categories...
+        };
+        
+        // Sample active rooms data
+        const activeRoomsData = [
+            { id: "GK123", host: "RajivK", category: "General Knowledge", players: "3/8", difficulty: "Medium" },
+            { id: "SP456", host: "SportsGuru", category: "Sports", players: "2/4", difficulty: "Hard" },
+            { id: "MV789", host: "FilmBuff", category: "Movies", players: "5/8", difficulty: "Easy" }
+        ];
+        
+        // Sample leaderboard data
+        const leaderboardData = {
+            all: [
+                { name: "Alex K.", xp: 12890, rank: 1 },
+                { name: "Sarah M.", xp: 8542, rank: 2 },
+                { name: "Michael P.", xp: 7215, rank: 3 },
+                { name: "Priya S.", xp: 6830, rank: 4 },
+                { name: "David W.", xp: 6245, rank: 5 },
+                { name: "Emma T.", xp: 5890, rank: 6 },
+                { name: "John D.", xp: 5712, rank: 7 },
+                { name: "Lisa R.", xp: 5461, rank: 8 }
+            ],
+            monthly: [
+                { name: "Sarah M.", xp: 3540, rank: 1 },
+                { name: "Alex K.", xp: 2980, rank: 2 },
+                { name: "Priya S.", xp: 2715, rank: 3 },
+                { name: "Emma T.", xp: 2210, rank: 4 },
+                { name: "Michael P.", xp: 1985, rank: 5 }
+            ],
+            weekly: [
+                { name: "Priya S.", xp: 1240, rank: 1 },
+                { name: "Emma T.", xp: 980, rank: 2 },
+                { name: "Alex K.", xp: 875, rank: 3 },
+                { name: "Michael P.", xp: 720, rank: 4 },
+                { name: "Sarah M.", xp: 645, rank: 5 }
+            ]
+        };
+        
+        // Sample user quizzes data
+        const userQuizzesData = [
+            { title: "Science Trivia", category: "Science", questions: 12, plays: 67, date: "2 weeks ago" },
+            { title: "History Masters", category: "History", questions: 20, plays: 43, date: "1 month ago" },
+            { title: "Movie Buffs", category: "Movies", questions: 15, plays: 89, date: "3 days ago" }
+        ];
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            setupEventListeners();
+        });
+
         // Initialize the app
         function initializeApp() {
-            // Load user data if it exists
-            if (localStorage.getItem('dimaagwaleUser')) {
-                user = JSON.parse(localStorage.getItem('dimaagwaleUser'));
-                updateUserDisplay();
-                showScreen('homeScreen');
-                // Only show profile prompt if the user hasn't signed up
+            // Load saved user data if available
+            loadUserData();
+            
+            // Set theme based on user preference
+            setTheme(user.settings.theme);
+            
+            // Update UI with user data
+            updateUserDisplay();
+            
+            // Show welcome screen for new users or home screen for returning users
+            if (!localStorage.getItem('dimaagwaleUser')) {
+                document.getElementById('welcomeOverlay').classList.remove('hidden');
+            } else {
+                // Show profile prompt if user hasn't signed up
                 if (!user.signedUp) {
                     setTimeout(showProfilePrompt, 3000);
                 }
-            } else {
-                // Show welcome screen for first-time visitors
-                document.getElementById('welcomeOverlay').classList.remove('hidden');
+                showScreen('homeScreen');
             }
             
-            // Setup theme based on user preference or system preference
-            if (user.settings && user.settings.theme === 'dark') {
-                document.body.classList.add('dark');
-                darkMode = true;
-                document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
-            }
-            
-            // Populate top players
+            // Populate data
             populateTopPlayers();
-            
-            // Setup event listeners
-            setupEventListeners();
+            populateActiveRooms();
+            populateMyQuizzes();
         }
-        
+
         // Set up event listeners
         function setupEventListeners() {
             // Theme toggle
             document.getElementById('themeToggle').addEventListener('click', toggleTheme);
             
-            // User profile button
-            document.getElementById('userProfile').addEventListener('click', openProfileModal);
-            
-            // Welcome modal "Start Journey" button
+            // Welcome modal
             document.getElementById('startJourney').addEventListener('click', startJourney);
             
-            // Profile modal "Save Profile" button
-            document.getElementById('saveProfile').addEventListener('click', saveUserProfile);
+            // User profile
+            document.getElementById('userProfile').addEventListener('click', openProfileModal);
             
-            // Category cards in Solo mode
+            // Category selection
             document.querySelectorAll('.category-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    document.querySelectorAll('.category-card').forEach(c => c.classList.remove('ring-2', 'ring-purple-500'));
-                    card.classList.add('ring-2', 'ring-purple-500');
-                    selectedCategory = card.dataset.category;
-                    updateStartButton();
+                card.addEventListener('click', function() {
+                    selectCategory(this.getAttribute('data-category'));
                 });
             });
             
-            // Difficulty buttons in Solo mode
+            // Difficulty selection
             document.querySelectorAll('.difficulty-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('ring-2', 'ring-white'));
-                    btn.classList.add('ring-2', 'ring-white');
-                    selectedDifficulty = btn.dataset.difficulty;
-                    updateStartButton();
+                btn.addEventListener('click', function() {
+                    selectDifficulty(this.getAttribute('data-difficulty'));
                 });
             });
             
-            // Start Solo Game button
+            // Solo game start
             document.getElementById('startSoloGame').addEventListener('click', startSoloGame);
+            
+            // Lifelines
+            document.getElementById('lifeline5050').addEventListener('click', use5050);
+            document.getElementById('lifelineSkip').addEventListener('click', useSkip);
+            
+            // Battle mode
+            document.getElementById('createBattle').addEventListener('click', createBattle);
+            document.getElementById('joinRoom').addEventListener('click', joinRoom);
+            document.getElementById('quickMatch').addEventListener('click', startQuickMatch);
+            
+            // Aspirants corner
+            document.querySelectorAll('.exam-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    selectExam(this.getAttribute('data-exam'));
+                });
+            });
+            
+            // Quiz creation
+            document.getElementById('addQuestion').addEventListener('click', addQuestionForm);
+            document.getElementById('saveQuiz').addEventListener('click', saveQuiz);
+            document.getElementById('csvUpload').addEventListener('change', handleCSVUpload);
+            
+            // Leaderboard filters
+            document.querySelectorAll('.leaderboard-filter').forEach(filter => {
+                filter.addEventListener('click', function() {
+                    populateLeaderboard(this.getAttribute('data-filter'));
+                    // Update active filter UI
+                    document.querySelectorAll('.leaderboard-filter').forEach(btn => {
+                        btn.classList.remove('bg-purple-500', 'text-white');
+                        btn.classList.add('bg-gray-300', 'text-gray-700');
+                    });
+                    this.classList.remove('bg-gray-300', 'text-gray-700');
+                    this.classList.add('bg-purple-500', 'text-white');
+                });
+            });
         }
-        
-        // Start the journey with just a name
+
+        // Load user data from localStorage
+        function loadUserData() {
+            const savedUser = localStorage.getItem('dimaagwaleUser');
+            if (savedUser) {
+                user = JSON.parse(savedUser);
+            }
+        }
+
+        // Save user data to localStorage
+        function saveUserData() {
+            localStorage.setItem('dimaagwaleUser', JSON.stringify(user));
+        }
+
+        // Update user display in UI
+        function updateUserDisplay() {
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userCoins').textContent = user.coins;
+            document.getElementById('userRank').textContent = user.rank;
+            document.getElementById('userXP').textContent = user.xp.toLocaleString();
+            document.getElementById('winRate').textContent = user.winRate;
+        }
+
+        // Set theme (dark/light)
+        function setTheme(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark');
+                document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                document.body.classList.remove('dark');
+                document.getElementById('themeToggle').innerHTML = '<i class="fas fa-moon"></i>';
+            }
+        }
+
+        // Toggle theme
+        function toggleTheme() {
+            const isDarkMode = document.body.classList.toggle('dark');
+            user.settings.theme = isDarkMode ? 'dark' : 'light';
+            document.getElementById('themeToggle').innerHTML = isDarkMode ? 
+                '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            saveUserData();
+        }
+
+        // Start user journey from welcome modal
         function startJourney() {
             const nameInput = document.getElementById('welcomeName');
             const name = nameInput.value.trim();
@@ -485,23 +1651,18 @@
                 return;
             }
             
-            // Set the name in user object 
             user.name = name;
             saveUserData();
             updateUserDisplay();
             
-            // Hide welcome overlay and show home screen
             document.getElementById('welcomeOverlay').classList.add('hidden');
             showScreen('homeScreen');
             
-            // Show a welcome message with the user's name
-            showNotification(`Welcome, ${name}! Enjoy the game!`, "success");
-            
             // Show profile prompt after a delay
-            setTimeout(showProfilePrompt, 5000);
+            setTimeout(showProfilePrompt, 3000);
         }
-        
-        // Show the profile prompt to encourage users to create a full profile
+
+        // Show profile signup prompt
         function showProfilePrompt() {
             if (!user.signedUp) {
                 document.getElementById('profilePrompt').classList.remove('hidden');
@@ -510,27 +1671,26 @@
                 }, 10000);
             }
         }
-        
-        // Close the profile prompt
+
+        // Close profile prompt
         function closeProfilePrompt() {
             document.getElementById('profilePrompt').classList.add('hidden');
         }
-        
-        // Open the profile modal
+
+        // Open profile modal
         function openProfileModal() {
-            // Pre-fill modal with existing user data
-            document.getElementById('profileName').value = user.name;
-            if (user.email) document.getElementById('profileEmail').value = user.email;
-            if (user.age) document.getElementById('profileAge').value = user.age;
-            
+            document.getElementById('profileName').value = user.name || '';
+            document.getElementById('profileEmail').value = user.email || '';
+            document.getElementById('profileAge').value = user.age || '';
             document.getElementById('profileModal').classList.remove('hidden');
+            document.getElementById('profilePrompt').classList.add('hidden');
         }
-        
-        // Close the profile modal
+
+        // Close profile modal
         function closeProfileModal() {
             document.getElementById('profileModal').classList.add('hidden');
         }
-        
+
         // Save user profile
         function saveUserProfile() {
             const name = document.getElementById('profileName').value.trim();
@@ -558,103 +1718,74 @@
             closeProfileModal();
             showNotification("Profile saved successfully!", "success");
         }
-        
-        // Save user data to local storage
-        function saveUserData() {
-            localStorage.setItem('dimaagwaleUser', JSON.stringify(user));
-        }
-        
-        // Update the displayed user information
-        function updateUserDisplay() {
-            document.getElementById('userName').textContent = user.name;
-            document.getElementById('userCoins').textContent = user.coins;
-            document.getElementById('userRank').textContent = user.rank;
-            document.getElementById('userXP').textContent = user.xp;
-            document.getElementById('winRate').textContent = user.winRate;
-        }
-        
-        // Show notification
-        function showNotification(message, type = "info") {
-            const notification = document.createElement('div');
-            notification.className = `bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 mb-4 notification ${type === 'error' ? 'border-l-4 border-red-500' : type === 'success' ? 'border-l-4 border-green-500' : 'border-l-4 border-blue-500'}`;
-            notification.innerHTML = `
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <i class="fas ${type === 'error' ? 'fa-exclamation-circle text-red-500' : type === 'success' ? 'fa-check-circle text-green-500' : 'fa-info-circle text-blue-500'}"></i>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-gray-800 dark:text-white">${message}</p>
-                    </div>
-                </div>
-            `;
-            document.getElementById('notificationContainer').appendChild(notification);
-            
-            setTimeout(() => {
-                notification.classList.add('opacity-0', 'translate-y-[-20px]');
-                notification.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                setTimeout(() => {
-                    notification.remove();
-                }, 500);
-            }, 3000);
-        }
-        
-        // Show a specific screen
+
+        // Show different screens
         function showScreen(screenId) {
+            // Hide all screens
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.add('hidden');
             });
+            
+            // Show selected screen
             document.getElementById(screenId).classList.remove('hidden');
+            
+            // Update current screen
             currentScreen = screenId;
             
-            // Show/hide the fixed home button based on current screen
+            // Show/hide fixed home button based on screen
+            const fixedHomeButton = document.getElementById('fixedHomeButton');
             if (screenId === 'homeScreen') {
-                document.getElementById('fixedHomeButton').classList.add('hidden');
+                fixedHomeButton.classList.add('hidden');
             } else {
-                document.getElementById('fixedHomeButton').classList.remove('hidden');
+                fixedHomeButton.classList.remove('hidden');
+            }
+            
+            // Specific actions for different screens
+            if (screenId === 'leaderboardScreen') {
+                populateLeaderboard('all');
+            } else if (screenId === 'homeScreen') {
+                populateTopPlayers();
+            } else if (screenId === 'battleScreen') {
+                populateActiveRooms();
             }
         }
-        
-        // Toggle between light/dark theme
-        function toggleTheme() {
-            darkMode = !darkMode;
-            document.body.classList.toggle('dark');
-            document.getElementById('themeToggle').innerHTML = darkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-            user.settings.theme = darkMode ? 'dark' : 'light';
-            saveUserData();
-        }
-        
-        // Populate top players
-        function populateTopPlayers() {
-            const playersContainer = document.getElementById('topPlayers');
-            playersContainer.innerHTML = '';
-            
-            topPlayersData.forEach((player, index) => {
-                const playerElement = document.createElement('div');
-                playerElement.className = 'leaderboard-item bg-gray-100 dark:bg-gray-700 rounded-lg p-3 flex items-center justify-between';
-                playerElement.style.animationDelay = `${index * 0.1}s`;
-                
-                playerElement.innerHTML = `
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center text-lg font-bold mr-3">
-                            ${player.avatar}
-                        </div>
-                        <div>
-                            <p class="font-medium text-gray-800 dark:text-white">${player.name}</p>
-                            <p class="text-xs text-gray-500">${player.rank}</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-bold text-purple-600">${player.xp} XP</p>
-                        <p class="text-xs text-gray-500">${index + 1 === 1 ? '1st' : index + 1 === 2 ? '2nd' : index + 1 === 3 ? '3rd' : `${index + 1}th`}</p>
-                    </div>
-                `;
-                
-                playersContainer.appendChild(playerElement);
+
+        // Select category in solo play
+        function selectCategory(category) {
+            // Remove selection from all category cards
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.classList.remove('ring-2', 'ring-purple-500');
             });
+            
+            // Add selection to clicked category
+            document.querySelector(`.category-card[data-category="${category}"]`).classList.add('ring-2', 'ring-purple-500');
+            
+            // Update selected category
+            selectedCategory = category;
+            
+            // Enable start button if both category and difficulty are selected
+            updateStartButtonState();
         }
-        
-        // Update the start button state based on selections
-        function updateStartButton() {
+
+        // Select difficulty in solo play
+        function selectDifficulty(difficulty) {
+            // Remove selection from all difficulty buttons
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-purple-500');
+            });
+            
+            // Add selection to clicked difficulty
+            document.querySelector(`.difficulty-btn[data-difficulty="${difficulty}"]`).classList.add('ring-2', 'ring-purple-500');
+            
+            // Update selected difficulty
+            selectedDifficulty = difficulty;
+            
+            // Enable start button if both category and difficulty are selected
+            updateStartButtonState();
+        }
+
+        // Update start button state based on selections
+        function updateStartButtonState() {
             const startButton = document.getElementById('startSoloGame');
             if (selectedCategory && selectedDifficulty) {
                 startButton.disabled = false;
@@ -664,42 +1795,701 @@
                 startButton.classList.add('opacity-50');
             }
         }
-        
-        // Start a solo game
+
+        // Start solo game
         function startSoloGame() {
             if (!selectedCategory || !selectedDifficulty) {
                 showNotification("Please select a category and difficulty level", "warning");
                 return;
             }
             
-            // Redirect to game screen (in a real implementation, this would load questions, etc.)
+            // Set errors allowed based on difficulty
+            if (selectedDifficulty === 'easy') {
+                errorsLeft = 2;
+            } else if (selectedDifficulty === 'medium') {
+                errorsLeft = 1;
+            } else {
+                errorsLeft = 0;
+            }
+            document.getElementById('errorsLeft').textContent = errorsLeft;
+            
+            // Get questions for selected category and difficulty
+            gameQuestions = getRandomQuestions(questionsData[selectedCategory][selectedDifficulty], 10);
+            
+            // Reset game state
+            currentQuestion = 0;
+            score = 0;
+            answeredCorrectly = 0;
+            totalAnswered = 0;
+            lifelinesUsed = {
+                '50-50': false,
+                'skip': false
+            };
+            
+            // Update UI
+            document.getElementById('currentScore').textContent = score;
+            document.getElementById('currentQuestion').textContent = 1;
+            document.getElementById('totalQuestions').textContent = gameQuestions.length;
+            
+            // Reset lifeline buttons
+            document.getElementById('lifeline5050').disabled = false;
+            document.getElementById('lifeline5050').classList.remove('opacity-50');
+            document.getElementById('lifelineSkip').disabled = false;
+            document.getElementById('lifelineSkip').classList.remove('opacity-50');
+            
+            // Display first question
+            displayQuestion();
+            
+            // Show game screen
             showScreen('soloGameScreen');
+        }
+
+        // Get random questions from a pool
+        function getRandomQuestions(pool, count) {
+            if (!pool || pool.length === 0) {
+                // Use general knowledge questions as fallback
+                pool = questionsData.general.medium;
+                showNotification("Using general knowledge questions as fallback", "info");
+            }
             
-            // Display a loading message for demo purposes
-            document.getElementById('soloGameScreen').innerHTML = `
-                <div class="flex items-center justify-center h-64">
-                    <div class="text-center">
-                        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500 mb-4"></div>
-                        <p class="text-gray-700 dark:text-gray-300">Loading ${selectedCategory} questions...</p>
-                    </div>
-                </div>
-            `;
+            // If we don't have enough questions, repeat some
+            if (pool.length < count) {
+                // Clone the pool multiple times
+                const repeatedPool = [...pool];
+                while (repeatedPool.length < count) {
+                    repeatedPool.push(...pool);
+                }
+                pool = repeatedPool;
+            }
             
-            // Simulate loading for demo
+            // Shuffle and pick the required number of questions
+            return shuffleArray(pool).slice(0, count);
+        }
+
+        // Shuffle an array (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // Display current question
+        function displayQuestion() {
+            // Clear any existing timer
+            if (timer) {
+                clearInterval(timer);
+            }
+            
+            // Get current question
+            const question = gameQuestions[currentQuestion];
+            
+            // Update question text
+            document.getElementById('questionText').textContent = question.question;
+            
+            // Clear and populate answer options
+            const answerContainer = document.getElementById('answerOptions');
+            answerContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'w-full text-left p-3 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors';
+                button.innerHTML = `
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-purple-500 text-white mr-2">
+                        ${String.fromCharCode(65 + index)}
+                    </span>
+                    ${option}
+                `;
+                button.onclick = () => selectAnswer(index);
+                answerContainer.appendChild(button);
+            });
+            
+            // Reset and start timer
+            timeLeft = 15;
+            document.getElementById('timeLeft').textContent = timeLeft;
+            document.getElementById('timerCircle').style.strokeDashoffset = '0';
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timeLeft').textContent = timeLeft;
+                
+                // Update timer circle
+                const dashOffset = 226 - ((timeLeft / 15) * 226);
+                document.getElementById('timerCircle').style.strokeDashoffset = dashOffset;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    timeUp();
+                }
+            }, 1000);
+        }
+
+        // Handle answer selection
+        function selectAnswer(answerIndex) {
+            // Clear timer
+            clearInterval(timer);
+            
+            const question = gameQuestions[currentQuestion];
+            const isCorrect = answerIndex === question.correct;
+            
+            // Update stats
+            totalAnswered++;
+            
+            if (isCorrect) {
+                // Correct answer
+                answeredCorrectly++;
+                
+                // Calculate score based on remaining time (bonus for faster answers)
+                const timeBonus = timeLeft * 10;
+                score += 100 + timeBonus;
+                
+                document.getElementById('currentScore').textContent = score;
+                
+                // Highlight correct answer
+                document.querySelectorAll('#answerOptions button')[answerIndex].classList.add('bg-green-200', 'dark:bg-green-800');
+                
+                showNotification("Correct! +" + (100 + timeBonus) + " points", "success");
+            } else {
+                // Wrong answer
+                errorsLeft--;
+                document.getElementById('errorsLeft').textContent = errorsLeft;
+                
+                // Highlight incorrect and correct answers
+                document.querySelectorAll('#answerOptions button')[answerIndex].classList.add('bg-red-200', 'dark:bg-red-800');
+                document.querySelectorAll('#answerOptions button')[question.correct].classList.add('bg-green-200', 'dark:bg-green-800');
+                
+                showNotification("Incorrect! The correct answer is " + String.fromCharCode(65 + question.correct), "error");
+                
+                // Check if game should end based on errors allowed
+                if (errorsLeft < 0) {
+                    setTimeout(() => {
+                        endGame(false);
+                    }, 1500);
+                    return;
+                }
+            }
+            
+            // Disable all answer buttons
+            document.querySelectorAll('#answerOptions button').forEach(button => {
+                button.disabled = true;
+                button.classList.add('opacity-75');
+            });
+            
+            // Move to next question or end game
             setTimeout(() => {
-                showNotification("Game feature is under development", "info");
-                showScreen('soloScreen');
+                currentQuestion++;
+                
+                if (currentQuestion < gameQuestions.length) {
+                    displayQuestion();
+                } else {
+                    endGame(true);
+                }
+            }, 1500);
+        }
+
+        // Time up function
+        function timeUp() {
+            // Count as wrong answer
+            errorsLeft--;
+            document.getElementById('errorsLeft').textContent = errorsLeft;
+            
+            // Update stats
+            totalAnswered++;
+            
+            // Show correct answer
+            const question = gameQuestions[currentQuestion];
+            document.querySelectorAll('#answerOptions button')[question.correct].classList.add('bg-green-200', 'dark:bg-green-800');
+            
+            showNotification("Time's up! The correct answer is " + String.fromCharCode(65 + question.correct), "warning");
+            
+            // Disable all answer buttons
+            document.querySelectorAll('#answerOptions button').forEach(button => {
+                button.disabled = true;
+                button.classList.add('opacity-75');
+            });
+            
+            // Check if game should end based on errors allowed
+            if (errorsLeft < 0) {
+                setTimeout(() => {
+                    endGame(false);
+                }, 1500);
+                return;
+            }
+            
+            // Move to next question or end game
+            setTimeout(() => {
+                currentQuestion++;
+                
+                if (currentQuestion < gameQuestions.length) {
+                    displayQuestion();
+                } else {
+                    endGame(true);
+                }
+            }, 1500);
+        }
+
+        // 50-50 lifeline
+        function use5050() {
+            if (lifelinesUsed['50-50']) return;
+            
+            const question = gameQuestions[currentQuestion];
+            const correctIndex = question.correct;
+            
+            // Find indices of wrong answers
+            const wrongIndices = [];
+            for (let i = 0; i < question.options.length; i++) {
+                if (i !== correctIndex) {
+                    wrongIndices.push(i);
+                }
+            }
+            
+            // Randomly keep one wrong answer and eliminate the rest
+            const keepWrongIndex = wrongIndices[Math.floor(Math.random() * wrongIndices.length)];
+            const buttonsToDisable = wrongIndices.filter(i => i !== keepWrongIndex);
+            
+            // Disable and grey out eliminated options
+            buttonsToDisable.forEach(index => {
+                const button = document.querySelectorAll('#answerOptions button')[index];
+                button.disabled = true;
+                button.classList.add('opacity-25', 'cursor-not-allowed');
+            });
+            
+            // Disable the lifeline button
+            document.getElementById('lifeline5050').disabled = true;
+            document.getElementById('lifeline5050').classList.add('opacity-50');
+            lifelinesUsed['50-50'] = true;
+            
+            showNotification("50-50 lifeline used! Two wrong answers removed.", "info");
+        }
+
+        // Skip question lifeline
+        function useSkip() {
+            if (lifelinesUsed['skip']) return;
+            
+            // Clear timer
+            clearInterval(timer);
+            
+            // Move to next question
+            currentQuestion++;
+            
+            if (currentQuestion < gameQuestions.length) {
+                displayQuestion();
+            } else {
+                endGame(true);
+            }
+            
+            // Disable the lifeline button
+            document.getElementById('lifelineSkip').disabled = true;
+            document.getElementById('lifelineSkip').classList.add('opacity-50');
+            lifelinesUsed['skip'] = true;
+            
+            showNotification("Skip lifeline used! Moving to next question.", "info");
+        }
+
+        // End the game
+        function endGame(completed) {
+            // Clear timer
+            if (timer) {
+                clearInterval(timer);
+            }
+            
+            // Calculate accuracy
+            const accuracy = totalAnswered > 0 ? (answeredCorrectly / totalAnswered) * 100 : 0;
+            
+            // Calculate XP gained
+            const xpGained = Math.round(score / 10);
+            
+            // Update user data
+            user.xp += xpGained;
+            saveUserData();
+            updateUserDisplay();
+            
+            // Determine result message based on performance
+            let resultTitle, resultMessage, resultIcon;
+            
+            if (!completed) {
+                resultTitle = "Game Over!";
+                resultMessage = "Better luck next time!";
+                resultIcon = '<i class="fas fa-heart-broken text-red-500"></i>';
+            } else if (accuracy >= 90) {
+                resultTitle = "Outstanding!";
+                resultMessage = "You're a quiz master!";
+                resultIcon = '<i class="fas fa-crown text-yellow-500"></i>';
+            } else if (accuracy >= 70) {
+                resultTitle = "Great Job!";
+                resultMessage = "You've got serious knowledge!";
+                resultIcon = '<i class="fas fa-trophy text-yellow-500"></i>';
+            } else if (accuracy >= 50) {
+                resultTitle = "Good Effort!";
+                resultMessage = "You're on the right track!";
+                resultIcon = '<i class="fas fa-medal text-blue-500"></i>';
+            } else {
+                resultTitle = "Practice Makes Perfect!";
+                resultMessage = "Keep learning and try again!";
+                resultIcon = '<i class="fas fa-book text-purple-500"></i>';
+            }
+            
+            // Update results screen
+            document.getElementById('resultIcon').innerHTML = resultIcon;
+            document.getElementById('resultTitle').textContent = resultTitle;
+            document.getElementById('resultMessage').textContent = resultMessage;
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalAccuracy').textContent = accuracy.toFixed(1) + '%';
+            document.getElementById('xpGained').textContent = '+' + xpGained;
+            
+            // Create performance chart
+            createPerformanceChart(accuracy);
+            
+            // Show results screen
+            showScreen('gameResultsScreen');
+            
+            // Show fireworks for good scores
+            if (accuracy >= 70) {
+                showFireworks();
+            }
+        }
+
+        // Create performance chart
+        function createPerformanceChart(accuracy) {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (window.performanceChart) {
+                window.performanceChart.destroy();
+            }
+            
+            window.performanceChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Correct', 'Incorrect', 'Skipped'],
+                    datasets: [{
+                        data: [answeredCorrectly, totalAnswered - answeredCorrectly, gameQuestions.length - totalAnswered],
+                        backgroundColor: ['#10B981', '#EF4444', '#9CA3AF'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    family: 'Poppins',
+                                    size: 12
+                                }
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // Play again function
+        function playAgain() {
+            showScreen('soloScreen');
+            
+            // Reset selections
+            selectedCategory = null;
+            selectedDifficulty = null;
+            
+            // Reset UI selections
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.classList.remove('ring-2', 'ring-purple-500');
+            });
+            
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-purple-500');
+            });
+            
+            // Disable start button
+            document.getElementById('startSoloGame').disabled = true;
+            document.getElementById('startSoloGame').classList.add('opacity-50');
+        }
+
+        // Share results function
+        function shareResults() {
+            showNotification("Sharing coming soon!", "info");
+        }
+
+        // Select exam in Aspirants Corner
+        function selectExam(examType) {
+            selectedExam = examType;
+            
+            // Update the exam details section
+            let examTitle, examDescription;
+            
+            switch (examType) {
+                case 'upsc':
+                    examTitle = 'UPSC Civil Services';
+                    examDescription = 'Prepare for preliminary and main examinations';
+                    break;
+                case 'cat':
+                    examTitle = 'CAT Exam';
+                    examDescription = 'Common Admission Test for MBA entrance';
+                    break;
+                case 'bank':
+                    examTitle = 'IBPS Exams';
+                    examDescription = 'Banking sector recruitment tests';
+                    break;
+                case 'ssc':
+                    examTitle = 'SSC Exams';
+                    examDescription = 'Staff Selection Commission tests';
+                    break;
+                case 'railway':
+                    examTitle = 'Railway Exams';
+                    examDescription = 'RRB & RRC recruitment tests';
+                    break;
+                case 'gmat':
+                    examTitle = 'GMAT Exam';
+                    examDescription = 'Graduate Management Admission Test';
+                    break;
+                case 'gate':
+                    examTitle = 'GATE Exam';
+                    examDescription = 'Graduate Aptitude Test in Engineering';
+                    break;
+                case 'neet':
+                    examTitle = 'NEET Exam';
+                    examDescription = 'National Eligibility cum Entrance Test for medical';
+                    break;
+                default:
+                    examTitle = 'Exam Preparation';
+                    examDescription = 'Practice questions for competitive exams';
+            }
+            
+            document.getElementById('examTitle').textContent = examTitle;
+            document.getElementById('examDescription').textContent = examDescription;
+            document.getElementById('examDetails').classList.remove('hidden');
+        }
+
+        // Hide exam details
+        function hideExamDetails() {
+            document.getElementById('examDetails').classList.add('hidden');
+            selectedExam = null;
+        }
+
+        // Start exam practice
+        function startExamPractice(level) {
+            // Set selected level
+            selectedExamLevel = level;
+            
+            // Check if we have questions for this exam and level
+            if (!examQuestionsData[selectedExam] || !examQuestionsData[selectedExam][level]) {
+                showNotification("Questions coming soon for this exam!", "info");
+                return;
+            }
+            
+            // Get questions
+            gameQuestions = getRandomQuestions(examQuestionsData[selectedExam][level], 10);
+            
+            // Reset game state
+            currentQuestion = 0;
+            score = 0;
+            answeredCorrectly = 0;
+            totalAnswered = 0;
+            
+            // Set errors based on level
+            errorsLeft = level === 'prelims' ? 2 : 1;
+            document.getElementById('errorsLeft').textContent = errorsLeft;
+            
+            // Reset lifelines
+            lifelinesUsed = {
+                '50-50': false,
+                'skip': false
+            };
+            
+            // Update UI
+            document.getElementById('currentScore').textContent = score;
+            document.getElementById('currentQuestion').textContent = 1;
+            document.getElementById('totalQuestions').textContent = gameQuestions.length;
+            
+            // Reset lifeline buttons
+            document.getElementById('lifeline5050').disabled = false;
+            document.getElementById('lifeline5050').classList.remove('opacity-50');
+            document.getElementById('lifelineSkip').disabled = false;
+            document.getElementById('lifelineSkip').classList.remove('opacity-50');
+            
+            // Display first question
+            displayQuestion();
+            
+            // Show game screen
+            showScreen('soloGameScreen');
+        }
+
+        // Create battle function
+        function createBattle() {
+            const category = document.getElementById('battleCategory').value;
+            const difficulty = document.getElementById('battleDifficulty').value;
+            const players = document.getElementById('battlePlayers').value;
+            
+            if (!category || !difficulty) {
+                showNotification("Please select category and difficulty", "warning");
+                return;
+            }
+            
+            // Generate room code
+            const roomCode = generateRoomCode();
+            battleRoomCode = roomCode;
+            
+            showNotification("Room created! Code: " + roomCode, "success");
+            
+            // Simulate waiting for players then start game
+            setTimeout(() => {
+                startBattleGame(roomCode);
+            }, 1500);
+        }
+
+        // Join room function
+        function joinRoom() {
+            const roomCode = document.getElementById('roomCode').value.trim();
+            
+            if (!roomCode) {
+                showNotification("Please enter a room code", "warning");
+                return;
+            }
+            
+            // Simulate room validation
+            setTimeout(() => {
+                startBattleGame(roomCode);
+            }, 1000);
+        }
+
+        // Start quick match function
+        function startQuickMatch() {
+            showNotification("Finding a match for you...", "info");
+            
+            // Simulate matchmaking
+            setTimeout(() => {
+                const roomCode = generateRoomCode();
+                startBattleGame(roomCode);
             }, 2000);
         }
-        
-        // Helper function to get random questions from an array
-        function getRandomQuestions(questions, count) {
-            const shuffled = [...questions].sort(() => 0.5 - Math.random());
-            return shuffled.slice(0, count);
+
+        // Generate room code
+        function generateRoomCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
         }
-        
-        // Initialize the app when the DOM is loaded
-        document.addEventListener('DOMContentLoaded', initializeApp);
-    </script>
-</body>
-</html>
+
+        // Start battle game
+        function startBattleGame(roomCode) {
+            battleRoomCode = roomCode;
+            
+            // Generate simulated players
+            battlePlayers = [
+                {name: user.name, score: 0, isUser: true},
+                {name: "Alex", score: 0},
+                {name: "Sarah", score: 0},
+                {name: "Michael", score: 0}
+            ];
+            
+            // Get questions for battle
+            gameQuestions = getRandomQuestions(questionsData.general.medium, 10);
+            
+            // Reset game state
+            currentQuestion = 0;
+            
+            // Update UI
+            document.getElementById('battleRoomCode').textContent = roomCode;
+            document.getElementById('battleCurrentQuestion').textContent = 1;
+            
+            // Update battle leaderboard
+            updateBattleLeaderboard();
+            
+            // Show battle screen
+            showScreen('battleGameScreen');
+            
+            // Start with first question
+            displayBattleQuestion();
+        }
+
+        // Display battle question
+        function displayBattleQuestion() {
+            // Clear any existing timer
+            if (timer) {
+                clearInterval(timer);
+            }
+            
+            // Get current question
+            const question = gameQuestions[currentQuestion];
+            
+            // Update question text
+            document.getElementById('battleQuestionText').textContent = question.question;
+            
+            // Clear and populate answer options
+            const answerContainer = document.getElementById('battleAnswerOptions');
+            answerContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'w-full text-left p-3 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors';
+                button.innerHTML = `
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-500 text-white mr-2">
+                        ${String.fromCharCode(65 + index)}
+                    </span>
+                    ${option}
+                `;
+                button.onclick = () => selectBattleAnswer(index);
+                answerContainer.appendChild(button);
+            });
+            
+            // Reset and start timer
+            timeLeft = 15;
+            document.getElementById('battleTimeLeft').textContent = timeLeft;
+            document.getElementById('battleTimerCircle').style.strokeDashoffset = '0';
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('battleTimeLeft').textContent = timeLeft;
+                
+                // Update timer circle
+                const dashOffset = 226 - ((timeLeft / 15) * 226);
+                document.getElementById('battleTimerCircle').style.strokeDashoffset = dashOffset;
+                
+                // Simulate other players answering
+                simulateOtherPlayersAnswering();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    battleTimeUp();
+                }
+            }, 1000);
+        }
+
+        // Simulate other players answering
+        function simulateOtherPlayersAnswering() {
+            // Each player has a chance to answer at each time interval
+            battlePlayers.forEach(player => {
+                if (!player.isUser && !player.answeredCurrentQuestion && Math.random() < 0.1) {
+                    // Simulate player answering
+                    const correctChance = Math.random() < 0.7 ? true : false; // 70% chance to be correct
+                    if (correctChance) {
+                        player.score += 100 + (timeLeft * 10); // Same scoring as user
+                    }
+                    player.answeredCurrentQuestion = true;
+                    
+                    // Update leaderboard
+                    updateBattleLeaderboard();
+                }
+            });
+        }
+
+        // Select battle answer
+        function selectBattleAnswer(answerIndex) {
+            // Clear timer
+            clearInterval(timer);
+            
+            const question = gameQuestions[currentQuestion];
+            const isCorrect = answerIndex === question.correct;
+            
+            // Find user in battle players
+            const user
