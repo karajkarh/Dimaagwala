@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindMash - Quiz & Trivia Game Platform</title>
+    <title>Dimaagwale - Quiz & Trivia Game Platform</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -125,7 +125,13 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+<body
+
+<!-- Back to Home Button -->
+<button onclick="window.location.href='index.html'" class="fixed bottom-4 left-4 z-50 bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800">
+  <i class="fas fa-home mr-2"></i>Home
+</button>
+ class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
     <div id="app" class="min-h-screen">
         <!-- Navigation Header -->
         <nav class="gradient-bg text-white shadow-lg sticky top-0 z-50">
@@ -133,7 +139,7 @@
                 <div class="flex justify-between items-center">
                     <div class="flex items-center space-x-2">
                         <i class="fas fa-brain text-2xl brain-logo"></i>
-                        <h1 class="text-2xl font-bold">MindMash</h1>
+                        <h1 class="text-2xl font-bold">Dimaagwale</h1>
                     </div>
                     <div class="flex items-center space-x-4">
                         <button id="themeToggle" class="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-all">
@@ -160,7 +166,7 @@
                     <div class="text-6xl mb-4 animate-bounce-slow">
                         <i class="fas fa-brain brain-logo"></i>
                     </div>
-                    <h2 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">Welcome to MindMash</h2>
+                    <h2 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">Welcome to Dimaagwale</h2>
                     <p class="text-xl text-gray-600 dark:text-gray-300">Challenge your mind, compete with friends!</p>
                 </div>
 
@@ -957,13 +963,13 @@
 
         function initializeApp() {
             // Load user data from localStorage
-            const savedUser = localStorage.getItem('mindmashUser');
+            const savedUser = localStorage.getItem('dimaagwalaUser');
             if (savedUser) {
                 currentUser = { ...currentUser, ...JSON.parse(savedUser) };
             }
 
             // Load theme preference
-            const savedTheme = localStorage.getItem('mindmashTheme');
+            const savedTheme = localStorage.getItem('dimaagwalaTheme');
             if (savedTheme === 'dark') {
                 toggleTheme();
             }
@@ -1060,7 +1066,7 @@
                 themeIcon.classList.add('fa-moon');
             }
 
-            localStorage.setItem('mindmashTheme', isDarkMode ? 'dark' : 'light');
+            localStorage.setItem('dimaagwalaTheme', isDarkMode ? 'dark' : 'light');
         }
 
         function updateUserDisplay() {
@@ -1072,7 +1078,7 @@
         }
 
         function saveUserData() {
-            localStorage.setItem('mindmashUser', JSON.stringify(currentUser));
+            localStorage.setItem('dimaagwalaUser', JSON.stringify(currentUser));
         }
 
         function populateTopPlayers() {
@@ -1787,9 +1793,9 @@
             };
             
             // Save to localStorage
-            const savedQuizzes = JSON.parse(localStorage.getItem('mindmashQuizzes') || '[]');
+            const savedQuizzes = JSON.parse(localStorage.getItem('dimaagwalaQuizzes') || '[]');
             savedQuizzes.push(quiz);
-            localStorage.setItem('mindmashQuizzes', JSON.stringify(savedQuizzes));
+            localStorage.setItem('dimaagwalaQuizzes', JSON.stringify(savedQuizzes));
             
             showNotification('Quiz saved successfully!', 'success');
             showScreen('organizerScreen');
@@ -1947,10 +1953,123 @@
         }
 
         // Initialize some sample data on first load
-        if (!localStorage.getItem('mindmashInitialized')) {
-            localStorage.setItem('mindmashInitialized', 'true');
+        if (!localStorage.getItem('dimaagwalaInitialized')) {
+            localStorage.setItem('dimaagwalaInitialized', 'true');
             // Add any initialization logic here
         }
     </script>
+
+<!-- Simplified First-Time Welcome -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const profile = JSON.parse(localStorage.getItem("dimaagwalaUserProfile") || "null");
+
+  // Greet only with first name if full profile not set
+  if (!profile || !profile.name) {
+    const firstName = prompt("Welcome to Dimaagwale! What's your name?");
+    if (firstName) {
+      localStorage.setItem("dimaagwalaUserProfile", JSON.stringify({ name: firstName }));
+      alert("Hi " + firstName + "! Enjoy exploring our massive quiz library.");
+    }
+  }
+
+  // Show name
+  const profileNow = JSON.parse(localStorage.getItem("dimaagwalaUserProfile") || "null");
+  const userNameEl = document.getElementById("userName");
+  if (userNameEl && profileNow?.name) {
+    userNameEl.textContent = profileNow.name;
+  }
+
+  // Add click event to open full profile modal
+  const userButton = document.getElementById("userProfile");
+  if (userButton) {
+    userButton.addEventListener("click", function () {
+      document.getElementById("profileModal").style.display = "flex";
+      const current = JSON.parse(localStorage.getItem("dimaagwalaUserProfile") || "{}");
+      if (current.name) document.getElementById("fullName").value = current.name;
+      if (current.age) document.getElementById("age").value = current.age;
+      if (current.email) document.getElementById("email").value = current.email;
+    });
+  }
+});
+
+function validateEmail(email) {
+  const re = /^\S+@\S+\.\S+$/;
+  return re.test(email);
+}
+
+function saveUserProfile() {
+  const name = document.getElementById("fullName").value.trim();
+  const age = document.getElementById("age").value.trim();
+  const email = document.getElementById("email").value.trim();
+
+  if (!name || !email || !validateEmail(email)) {
+    alert("Please enter a valid name and email.");
+    return;
+  }
+
+  const profile = { name, age, email };
+  localStorage.setItem("dimaagwalaUserProfile", JSON.stringify(profile));
+  document.getElementById("profileModal").style.display = "none";
+  const userNameEl = document.getElementById("userName");
+  if (userNameEl) userNameEl.textContent = profile.name;
+}
+</script>
+
+<!-- Full Profile Modal (only via Player icon) -->
+<div id="profileModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;padding:25px 30px;border-radius:12px;max-width:400px;width:90%;">
+    <h2 style="font-size:20px;margin-bottom:15px;text-align:center;">Your Profile</h2>
+    <input id="fullName" placeholder="Full Name" style="width:100%;padding:10px;margin-bottom:10px;" />
+    <input id="age" type="number" placeholder="Age (optional)" style="width:100%;padding:10px;margin-bottom:10px;" />
+    <input id="email" type="email" placeholder="Email (required)" style="width:100%;padding:10px;margin-bottom:15px;" />
+    <button onclick="saveUserProfile()" style="width:100%;padding:10px;background:#4CAF50;color:white;border:none;border-radius:5px;">Save Profile</button>
+  </div>
+</div>
+
+
+<!-- Save Profile Modal -->
+<div id="saveProfileModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50 hidden">
+  <div class="bg-white p-6 rounded-xl text-center max-w-md w-full">
+    <h2 class="text-xl font-bold mb-2">Save Your Progress</h2>
+    <p class="mb-4">Sign up to track your XP and rank.</p>
+    <input id="userNameInput" type="text" placeholder="Your Name" class="w-full mb-2 px-3 py-2 border rounded">
+    <input id="userEmailInput" type="email" placeholder="Email" class="w-full mb-2 px-3 py-2 border rounded">
+    <input id="userAgeInput" type="number" placeholder="Age (optional)" class="w-full mb-4 px-3 py-2 border rounded">
+    <button onclick="saveUserProfile()" class="bg-purple-600 text-white px-6 py-2 rounded">Save Profile</button>
+  </div>
+</div>
+
+<script>
+  // Show Welcome Modal on Load
+  window.onload = () => {
+    const name = localStorage.getItem("playerName") || "Player";
+    const greet = document.getElementById("greetingText");
+    if (greet) greet.textContent = `Let's test your knowledge, ${name}!`;
+    const modal = document.getElementById("welcomeModal");
+    if (modal) modal.classList.remove("hidden");
+  };
+
+  function closeWelcomeModal() {
+    const modal = document.getElementById("welcomeModal");
+    if (modal) modal.classList.add("hidden");
+    const saveModal = document.getElementById("saveProfileModal");
+    if (saveModal) saveModal.classList.remove("hidden");
+  }
+
+  function saveUserProfile() {
+    const name = document.getElementById("userNameInput").value;
+    const email = document.getElementById("userEmailInput").value;
+    const age = document.getElementById("userAgeInput").value;
+
+    if (!name || !email) return alert("Name and Email are required!");
+    localStorage.setItem("playerName", name);
+    localStorage.setItem("playerEmail", email);
+    if (age) localStorage.setItem("playerAge", age);
+    alert("Profile saved!");
+    document.getElementById("saveProfileModal").classList.add("hidden");
+  }
+</script>
+
 </body>
 </html>
