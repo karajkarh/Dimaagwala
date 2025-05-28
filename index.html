@@ -191,7 +191,25 @@
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
     <div id="app" class="min-h-screen">
-        <!-- Persistent Home Button -->
+<!-- Solo Name Modal (hidden by default) -->
+<div id="soloNameModal" class="welcome-overlay hidden">
+    <div class="welcome-modal dark:bg-gray-800">
+        <div class="text-5xl mb-4 animate-bounce-slow">
+            <i class="fas fa-brain brain-logo"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">Hey Future Dimaagwala!</h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Enter your name to begin Solo Play.</p>
+        <div class="mb-4">
+            <input type="text" id="soloPlayerName" placeholder="Enter your name" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500" />
+        </div>
+        <button id="startSoloJourney" class="gradient-bg text-white px-6 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
+            Start Game
+        </button>
+    </div>
+</div>
+
+<!-- Notification (for greeting) -->
+<div id="soloGreeting" class="fixed top-8 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white px-6 py-3 rounded-xl shadow-lg text-lg font-bold hidden z-50"></div>        <!-- Persistent Home Button -->
         <button id="fixedHomeButton" onclick="showScreen('homeScreen')" class="fixed-home-btn gradient-bg text-white shadow-lg hidden">
             <i class="fas fa-home text-xl"></i>
         </button>
@@ -220,24 +238,7 @@
                 </div>
             </div>
         </nav>
-
         <!-- Welcome Modal -->
-        <div id="welcomeOverlay" class="welcome-overlay hidden">
-            <div class="welcome-modal dark:bg-gray-800">
-                <div class="text-5xl mb-4 animate-bounce-slow">
-                    <i class="fas fa-brain brain-logo"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">Welcome to Dimaagwale</h2>
-                <p class="text-gray-600 dark:text-gray-300 mb-6">Let's test your knowledge and challenge your mind!</p>
-                <div class="mb-4">
-                    <input type="text" id="welcomeName" placeholder="Enter your name" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                </div>
-                <button id="startJourney" class="gradient-bg text-white px-6 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
-                    Start My Journey
-                </button>
-            </div>
-        </div>
-
         <!-- Profile Sign-up Prompt -->
         <div id="profilePrompt" class="fixed top-16 right-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg max-w-xs notification hidden">
             <div class="flex items-start">
@@ -256,22 +257,6 @@
                 </button>
             </div>
         </div>
-
-        <!-- Notification Container -->
-        <div id="notificationContainer" class="fixed top-4 right-4 z-50"></div>
-
-        <!-- Main Content -->
-        <main class="container mx-auto px-4 py-6">
-            <!-- Home Screen -->
-            <div id="homeScreen" class="screen">
-                <div class="text-center mb-8">
-                    <div class="text-6xl mb-4 animate-bounce-slow">
-                        <i class="fas fa-brain brain-logo"></i>
-                    </div>
-                    <h2 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">Welcome to Dimaagwale</h2>
-                    <p class="text-xl text-gray-600 dark:text-gray-300">Challenge your mind, compete with friends!</p>
-                </div>
-
                 <!-- User Stats Dashboard -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
@@ -2493,3 +2478,71 @@
             
             // Find user in battle players
             const user
+            <script>
+// --- Minimal solo play name logic ---
+let soloPlayerName = "";
+
+// Helper to show/hide modal
+function showSoloNameModal() {
+    document.getElementById('soloPlayerName').value = "";
+    document.getElementById('soloNameModal').classList.remove('hidden');
+}
+function hideSoloNameModal() {
+    document.getElementById('soloNameModal').classList.add('hidden');
+}
+
+// Helper to show greeting
+function showSoloGreeting(name) {
+    const greetDiv = document.getElementById('soloGreeting');
+    greetDiv.innerText = `Hello ${name}! All the best for the game. Let’s be Dimaagwale (people with wise brains)!`;
+    greetDiv.classList.remove('hidden');
+    setTimeout(() => greetDiv.classList.add('hidden'), 3000); // Hide after 3s
+}
+
+// Solo Play card/button click: ask for name if not set
+document.querySelector('[onclick="showScreen(\'soloScreen\')"]').onclick = function() {
+    if (!soloPlayerName) {
+        showSoloNameModal();
+    } else {
+        showScreen('soloScreen');
+    }
+};
+
+// When user clicks Start in the modal
+document.getElementById('startSoloJourney').onclick = function() {
+    const name = document.getElementById('soloPlayerName').value.trim();
+    if (!name) {
+        alert("Please enter your name to continue!");
+        return;
+    }
+    soloPlayerName = name;
+    hideSoloNameModal();
+    showSoloGreeting(name);
+    // Optionally update header userName:
+    document.getElementById('userName').innerText = name;
+    // Show solo screen
+    showScreen('soloScreen');
+};
+
+// Optional: close modal if clicking outside modal content
+document.getElementById('soloNameModal').addEventListener('click', function(e) {
+    if (e.target === this) hideSoloNameModal();
+});
+
+// --- Remove automatic welcome/profile prompts on load ---
+window.addEventListener('DOMContentLoaded', function() {
+    // Hide any welcome/profile modals if shown by default
+    const welcome = document.getElementById('welcomeOverlay');
+    if (welcome) welcome.classList.add('hidden');
+    const profilePrompt = document.getElementById('profilePrompt');
+    if (profilePrompt) profilePrompt.classList.add('hidden');
+});
+
+// --- Score tracking (no persistent storage) ---
+// Just use simple JS variables for the user's current solo game score.
+// Example:
+let soloScore = 0;
+// When game starts: soloScore = 0;
+// When user answers correctly: soloScore++;
+// Show score live on the solo game screen as you already do.
+</script>
