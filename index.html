@@ -251,7 +251,7 @@ function startSoloWithName() {
                     <h3 class="text-sm font-medium text-gray-800 dark:text-white">Want to save your progress?</h3>
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Sign up to track all your quizzes and achievements!</p>
                     <div class="mt-2">
-                        <button onclick="openProfileModal()" class="text-xs text-white bg-purple-500 px-3 py-1 rounded-full">Sign Up</button>
+                        <button onclick="alert('Profile saving is coming soon. For now, just play and enjoy the quiz!')" class="text-xs text-white bg-purple-500 px-3 py-1 rounded-full">Sign Up</button>
                     </div>
                 </div>
                 <button onclick="closeProfilePrompt()" class="ml-4 text-gray-400 hover:text-gray-500">
@@ -1696,12 +1696,8 @@ function startSoloWithName() {
 
         // Open profile modal
         function openProfileModal() {
-            document.getElementById('profileName').value = user.name || '';
-            document.getElementById('profileEmail').value = user.email || '';
-            document.getElementById('profileAge').value = user.age || '';
-            document.getElementById('profileModal').classList.remove('hidden');
-            document.getElementById('profilePrompt').classList.add('hidden');
-        }
+    alert("Profile saving is coming soon. For now, just play and enjoy the quiz!");
+}
 
         // Close profile modal
         function closeProfileModal() {
