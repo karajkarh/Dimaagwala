@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dimaagwala - Quiz & Trivia Game Platform</title>
+    <title>Dimaagwale - Smart Quiz Platform</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             font-family: 'Poppins', sans-serif;
@@ -17,37 +16,41 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
-        .gradient-orange {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-        
-        .gradient-purple {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-        
-        .brain-logo {
-            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
         
-        .animate-bounce-slow {
-            animation: bounce 2s infinite;
+        .card-hover {
+            transition: all 0.3s ease;
         }
         
-        .animate-pulse-soft {
-            animation: pulse 3s infinite;
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .dark .gradient-bg {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
         .confetti {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1000;
+            width: 10px;
+            height: 10px;
+            background: #667eea;
+            animation: confetti-fall 3s linear infinite;
         }
         
         @keyframes confetti-fall {
@@ -55,1955 +58,1086 @@
             100% { transform: translateY(100vh) rotate(360deg); }
         }
         
-        .confetti-piece {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            animation: confetti-fall 3s linear infinite;
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
         }
         
-        .dark .dark\:bg-gray-900 {
-            background-color: #1a202c;
-        }
-        
-        .dark .dark\:bg-gray-800 {
-            background-color: #2d3748;
-        }
-        
-        .dark .dark\:text-white {
-            color: #ffffff;
-        }
-        
-        .dark .dark\:text-gray-300 {
-            color: #cbd5e0;
-        }
-        
-        .quiz-card {
-            transition: all 0.3s ease;
-            transform: translateY(0);
-        }
-        
-        .quiz-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .progress-bar {
-            transition: width 0.5s ease-in-out;
+            transition: width 0.3s ease;
         }
         
-        .timer-ring {
-            transition: stroke-dashoffset 1s linear;
+        .level-badge {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
         }
         
-        .leaderboard-item {
-            animation: slideInRight 0.5s ease-out forwards;
-            opacity: 0;
-            transform: translateX(50px);
-        }
-        
-        @keyframes slideInRight {
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        .notification {
-            animation: slideInDown 0.5s ease-out;
-        }
-        
-        @keyframes slideInDown {
-            from {
-                transform: translateY(-100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
+        .easy-badge { background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%); }
+        .medium-badge { background: linear-gradient(45deg, #43e97b 0%, #38f9d7 100%); }
+        .hard-badge { background: linear-gradient(45deg, #fa709a 0%, #fee140 100%); }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-    <div id="app" class="min-h-screen">
-        <!-- Navigation Header -->
-        <nav class="gradient-bg text-white shadow-lg sticky top-0 z-50">
-            <div class="container mx-auto px-4 py-3">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center space-x-2">
-                        <i class="fas fa-brain text-2xl brain-logo"></i>
-                        <h1 class="text-2xl font-bold">Dimaagwala</h1>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <button id="themeToggle" class="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-all">
-                            <i class="fas fa-moon"></i>
-                        </button>
-                        <div class="flex items-center space-x-2">
-                            <i class="fas fa-coins text-yellow-300"></i>
-                            <span id="userCoins">1000</span>
-                        </div>
-                        <button id="userProfile" class="flex items-center space-x-2 bg-white bg-opacity-20 rounded-full px-3 py-1">
-                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L13.5 2.5L16.17 5.17L10.5 10.84L15.16 15.5L17.5 13.16L20.17 15.84L21.5 14.34L19 11.84V9H21ZM12.5 12.5C12.5 13.33 11.83 14 11 14S9.5 13.33 9.5 12.5 10.17 11 11 11 12.5 11.67 12.5 12.5Z'/%3E%3C/svg%3E" alt="User" class="w-6 h-6 rounded-full">
-                            <span id="userName">Player</span>
-                        </button>
-                    </div>
+    <!-- Header -->
+    <header class="gradient-bg shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-brain text-white text-3xl"></i>
+                    <h1 class="text-white text-2xl font-bold">Dimaagwale</h1>
                 </div>
-            </div>
-        </nav>
-
-        <!-- Main Content -->
-        <main class="container mx-auto px-4 py-6">
-            <!-- Home Screen -->
-            <div id="homeScreen" class="screen">
-                <div class="text-center mb-8">
-                    <div class="text-6xl mb-4 animate-bounce-slow">
-                        <i class="fas fa-brain brain-logo"></i>
+                <div class="flex items-center space-x-4">
+                    <div class="text-white font-semibold">
+                        <i class="fas fa-coins mr-2"></i>
+                        <span id="scoreDisplay">0</span>
                     </div>
-                    <h2 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">Welcome to Dimaagwala</h2>
-                    <p class="text-xl text-gray-600 dark:text-gray-300">Challenge your mind, compete with friends!</p>
-                </div>
-
-                <!-- User Stats Dashboard -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-600 dark:text-gray-300">Current Rank</p>
-                                <p class="text-2xl font-bold text-purple-600" id="userRank">Scholar</p>
-                            </div>
-                            <i class="fas fa-trophy text-3xl text-yellow-500"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-600 dark:text-gray-300">Total XP</p>
-                                <p class="text-2xl font-bold text-blue-600" id="userXP">2,450</p>
-                            </div>
-                            <i class="fas fa-star text-3xl text-blue-500"></i>
-                        </div>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-600 dark:text-gray-300">Win Rate</p>
-                                <p class="text-2xl font-bold text-green-600" id="winRate">78%</p>
-                            </div>
-                            <i class="fas fa-chart-line text-3xl text-green-500"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Game Mode Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="quiz-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg cursor-pointer" onclick="showScreen('soloScreen')">
-                        <div class="gradient-bg text-white rounded-lg p-4 mb-4">
-                            <i class="fas fa-user text-3xl mb-2"></i>
-                            <h3 class="text-xl font-bold">Solo Play</h3>
-                        </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4">Practice and learn with solo quizzes</p>
-                        <div class="flex justify-between text-sm text-gray-500">
-                            <span><i class="fas fa-clock"></i> 10-20 questions</span>
-                            <span><i class="fas fa-heart"></i> 3 lifelines</span>
-                        </div>
-                    </div>
-
-                    <div class="quiz-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg cursor-pointer" onclick="showScreen('battleScreen')">
-                        <div class="gradient-orange text-white rounded-lg p-4 mb-4">
-                            <i class="fas fa-users text-3xl mb-2"></i>
-                            <h3 class="text-xl font-bold">Battle Mode</h3>
-                        </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4">Compete with players worldwide</p>
-                        <div class="flex justify-between text-sm text-gray-500">
-                            <span><i class="fas fa-trophy"></i> Live competition</span>
-                            <span><i class="fas fa-bolt"></i> Speed matters</span>
-                        </div>
-                    </div>
-
-                    <div class="quiz-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg cursor-pointer" onclick="showScreen('organizerScreen')">
-                        <div class="gradient-purple text-white rounded-lg p-4 mb-4">
-                            <i class="fas fa-crown text-3xl mb-2"></i>
-                            <h3 class="text-xl font-bold">Host Quiz</h3>
-                        </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4">Create and host custom quizzes</p>
-                        <div class="flex justify-between text-sm text-gray-500">
-                            <span><i class="fas fa-edit"></i> Custom questions</span>
-                            <span><i class="fas fa-share"></i> Share with friends</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Weekly Challenges -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
-                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">
-                        <i class="fas fa-calendar-week text-purple-500 mr-2"></i>
-                        Weekly Challenge
-                    </h3>
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">Science & Technology Quiz</p>
-                            <p class="text-gray-600 dark:text-gray-400">Answer 50 questions correctly to win 500 coins!</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm text-gray-500">Progress: 32/50</p>
-                            <div class="w-32 bg-gray-200 rounded-full h-2 mt-1">
-                                <div class="bg-purple-600 h-2 rounded-full progress-bar" style="width: 64%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Leaderboard Preview -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white">
-                            <i class="fas fa-trophy text-yellow-500 mr-2"></i>
-                            Top Players
-                        </h3>
-                        <button onclick="showScreen('leaderboardScreen')" class="text-purple-600 hover:text-purple-800">View All</button>
-                    </div>
-                    <div id="topPlayers" class="space-y-3">
-                        <!-- Top players will be populated here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Solo Play Screen -->
-            <div id="soloScreen" class="screen hidden">
-                <div class="mb-6">
-                    <button onclick="showScreen('homeScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
-                        <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                    <button id="profileBtn" class="text-white hover:text-gray-200 transition-colors">
+                        <i class="fas fa-user-circle text-2xl"></i>
+                    </button>
+                    <button id="themeToggle" class="text-white hover:text-gray-200 transition-colors">
+                        <i class="fas fa-sun text-xl"></i>
                     </button>
                 </div>
+            </div>
+        </div>
+    </header>
 
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Solo Play Mode</h2>
-                    <p class="text-gray-600 dark:text-gray-300">Choose a category and test your knowledge!</p>
-                </div>
-
-                <!-- Category Selection -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <div class="category-card bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all" data-category="general">
-                        <div class="text-center">
-                            <i class="fas fa-globe text-3xl text-blue-500 mb-2"></i>
-                            <h3 class="font-bold text-gray-800 dark:text-white">General Knowledge</h3>
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Home Screen -->
+        <div id="homeScreen" class="screen">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold gradient-text mb-4">Welcome to Dimaagwale!</h2>
+                <p class="text-gray-600 dark:text-gray-300 text-lg">Test your knowledge and become one of the smart brains!</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <!-- Solo Play Card -->
+                <div class="card-hover bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg cursor-pointer" onclick="showScreen('soloPlayScreen')">
+                    <div class="text-center">
+                        <div class="gradient-bg rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-user text-white text-3xl"></i>
                         </div>
-                    </div>
-                    <div class="category-card bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all" data-category="sports">
-                        <div class="text-center">
-                            <i class="fas fa-football-ball text-3xl text-green-500 mb-2"></i>
-                            <h3 class="font-bold text-gray-800 dark:text-white">Sports</h3>
-                        </div>
-                    </div>
-                    <div class="category-card bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all" data-category="movies">
-                        <div class="text-center">
-                            <i class="fas fa-film text-3xl text-red-500 mb-2"></i>
-                            <h3 class="font-bold text-gray-800 dark:text-white">Movies</h3>
-                        </div>
-                    </div>
-                    <div class="category-card bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all" data-category="history">
-                        <div class="text-center">
-                            <i class="fas fa-landmark text-3xl text-yellow-500 mb-2"></i>
-                            <h3 class="font-bold text-gray-800 dark:text-white">History</h3>
-                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">Solo Play</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Challenge yourself across 8 different categories with multiple difficulty levels</p>
+                        <div class="text-sm text-purple-600 dark:text-purple-400 font-semibold">8 Categories • 3 Levels Each</div>
                     </div>
                 </div>
 
-                <!-- Difficulty Selection -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Select Difficulty</h3>
-                    <div class="flex space-x-4">
-                        <button class="difficulty-btn bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors" data-difficulty="easy">
-                            <i class="fas fa-seedling mr-2"></i>Easy
-                        </button>
-                        <button class="difficulty-btn bg-yellow-500 text-white px-6 py-2 rounded-lg hover:bg-yellow-600 transition-colors" data-difficulty="medium">
-                            <i class="fas fa-fire mr-2"></i>Medium
-                        </button>
-                        <button class="difficulty-btn bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors" data-difficulty="hard">
-                            <i class="fas fa-skull mr-2"></i>Hard
-                        </button>
+                <!-- Global Quizzes Card -->
+                <div class="card-hover bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg cursor-pointer" onclick="showScreen('globalQuizzesScreen')">
+                    <div class="text-center">
+                        <div class="gradient-bg rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-globe text-white text-3xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">Global Quizzes</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Explore knowledge from different countries and cultures around the world</p>
+                        <div class="text-sm text-purple-600 dark:text-purple-400 font-semibold">6 Countries • Multiple Topics</div>
                     </div>
                 </div>
 
-                <div class="text-center">
-                    <button id="startSoloGame" class="gradient-bg text-white px-8 py-3 rounded-lg text-xl font-bold hover:opacity-90 transition-opacity disabled:opacity-50" disabled>
-                        <i class="fas fa-play mr-2"></i>Start Game
+                <!-- Aspirants Corner Card -->
+                <div class="card-hover bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg cursor-pointer" onclick="showScreen('aspirantsCornerScreen')">
+                    <div class="text-center">
+                        <div class="gradient-bg rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-graduation-cap text-white text-3xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">Aspirants Corner</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Prepare for competitive exams like UPSC, NEET, SSC and more</p>
+                        <div class="text-sm text-purple-600 dark:text-purple-400 font-semibold">Multiple Exams • Subject-wise</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Solo Play Screen -->
+        <div id="soloPlayScreen" class="screen hidden">
+            <div class="flex items-center mb-6">
+                <button onclick="showScreen('homeScreen')" class="mr-4 text-gray-600 dark:text-gray-300 hover:text-purple-600">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <h2 class="text-3xl font-bold gradient-text">Solo Play</h2>
+            </div>
+            
+            <div id="nameEntry" class="mb-8 text-center">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md mx-auto">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">What's your name?</h3>
+                    <input type="text" id="playerName" placeholder="Enter your name" class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <button onclick="startSoloPlay()" class="w-full mt-4 gradient-bg text-white font-semibold py-3 rounded-lg hover:opacity-90 transition-opacity">
+                        Let's Play!
                     </button>
                 </div>
             </div>
 
-            <!-- Solo Game Screen -->
-            <div id="soloGameScreen" class="screen hidden">
-                <div class="mb-6">
-                    <div class="flex justify-between items-center">
-                        <button onclick="showScreen('soloScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
-                            <i class="fas fa-times mr-2"></i>Quit
-                        </button>
-                        <div class="flex items-center space-x-4">
-                            <div class="text-center">
-                                <p class="text-sm text-gray-600 dark:text-gray-300">Question</p>
-                                <p class="text-xl font-bold text-gray-800 dark:text-white"><span id="currentQuestion">1</span>/<span id="totalQuestions">10</span></p>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-sm text-gray-600 dark:text-gray-300">Score</p>
-                                <p class="text-xl font-bold text-purple-600" id="currentScore">0</p>
-                            </div>
+            <div id="categoryGrid" class="grid md:grid-cols-4 gap-6 hidden">
+                <!-- Categories will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Level Selection Screen -->
+        <div id="levelScreen" class="screen hidden">
+            <div class="flex items-center mb-6">
+                <button onclick="showScreen('soloPlayScreen')" class="mr-4 text-gray-600 dark:text-gray-300 hover:text-purple-600">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <h2 class="text-3xl font-bold gradient-text" id="categoryTitle">Category</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg card-hover cursor-pointer" onclick="startQuiz('easy')">
+                    <div class="text-center">
+                        <div class="easy-badge rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-seedling text-white text-2xl"></i>
                         </div>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Easy</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-3">10 Questions • 2 Lifelines</p>
+                        <div id="easyStatus" class="text-sm font-semibold"></div>
                     </div>
                 </div>
 
-                <!-- Timer Circle -->
-                <div class="text-center mb-6">
-                    <div class="relative inline-block">
-                        <svg class="w-20 h-20 transform -rotate-90">
-                            <circle cx="40" cy="40" r="36" stroke="#e5e7eb" stroke-width="8" fill="transparent"></circle>
-                            <circle id="timerCircle" cx="40" cy="40" r="36" stroke="#8b5cf6" stroke-width="8" fill="transparent" 
-                                stroke-dasharray="226" stroke-dashoffset="0" class="timer-ring"></circle>
-                        </svg>
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <span id="timeLeft" class="text-2xl font-bold text-purple-600">15</span>
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg card-hover cursor-pointer" onclick="startQuiz('medium')">
+                    <div class="text-center">
+                        <div class="medium-badge rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-mountain text-white text-2xl"></i>
                         </div>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Medium</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-3">10 Questions • 1 Lifeline</p>
+                        <div id="mediumStatus" class="text-sm font-semibold"></div>
                     </div>
                 </div>
 
-                <!-- Question Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
-                    <h3 id="questionText" class="text-xl font-bold text-gray-800 dark:text-white mb-6">Loading question...</h3>
-                    <div id="answerOptions" class="space-y-3">
-                        <!-- Answer options will be populated here -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg card-hover cursor-pointer" onclick="startQuiz('hard')">
+                    <div class="text-center">
+                        <div class="hard-badge rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-fire text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Hard</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-3">10 Questions • No Lifelines</p>
+                        <div id="hardStatus" class="text-sm font-semibold"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quizScreen" class="screen hidden">
+            <div class="max-w-4xl mx-auto">
+                <!-- Quiz Header -->
+                <div class="flex justify-between items-center mb-6">
+                    <button onclick="exitQuiz()" class="text-gray-600 dark:text-gray-300 hover:text-purple-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                    <div class="text-center">
+                        <div class="text-sm text-gray-600 dark:text-gray-300">Question <span id="currentQuestion">1</span> of <span id="totalQuestions">10</span></div>
+                        <div class="w-64 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
+                            <div id="progressBar" class="progress-bar bg-purple-600 h-2 rounded-full" style="width: 10%"></div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-600 dark:text-gray-300">Score</div>
+                        <div class="font-bold text-lg text-purple-600" id="currentScore">0</div>
                     </div>
                 </div>
 
                 <!-- Lifelines -->
-                <div class="flex justify-center space-x-4 mb-6">
-                    <button id="lifeline5050" class="lifeline-btn bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                <div id="lifelinesContainer" class="flex justify-center space-x-4 mb-6">
+                    <button id="fiftyFiftyBtn" onclick="useFiftyFifty()" class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors">
                         <i class="fas fa-divide mr-2"></i>50-50
                     </button>
-                    <button id="lifelineSkip" class="lifeline-btn bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors">
+                    <button id="skipBtn" onclick="skipQuestion()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
                         <i class="fas fa-forward mr-2"></i>Skip
                     </button>
-                    <button id="lifelineFreeze" class="lifeline-btn bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
-                        <i class="fas fa-snowflake mr-2"></i>Freeze Time
-                    </button>
+                </div>
+
+                <!-- Question Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg mb-6">
+                    <h3 id="questionText" class="text-xl font-semibold text-gray-800 dark:text-white mb-6"></h3>
+                    <div id="optionsContainer" class="space-y-3">
+                        <!-- Options will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Explanation Card (Hidden initially) -->
+                <div id="explanationCard" class="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-2xl p-6 hidden">
+                    <h4 class="font-semibold text-green-800 dark:text-green-200 mb-2">Explanation:</h4>
+                    <p id="explanationText" class="text-green-700 dark:text-green-300"></p>
                 </div>
             </div>
-
-            <!-- Battle Mode Screen -->
-            <div id="battleScreen" class="screen hidden">
-                <div class="mb-6">
-                    <button onclick="showScreen('homeScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
-                        <i class="fas fa-arrow-left mr-2"></i>Back to Home
-                    </button>
-                </div>
-
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Battle Mode</h2>
-                    <p class="text-gray-600 dark:text-gray-300">Compete with players from around the world!</p>
-                </div>
-
-                <!-- Join Options -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                            <i class="fas fa-random text-purple-500 mr-2"></i>
-                            Quick Match
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4">Get matched with players of similar skill level</p>
-                        <button id="quickMatch" class="gradient-bg text-white w-full py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
-                            <i class="fas fa-bolt mr-2"></i>Find Match
-                        </button>
-                    </div>
-
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                            <i class="fas fa-key text-orange-500 mr-2"></i>
-                            Join Room
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4">Enter a room code to join a specific game</p>
-                        <div class="flex space-x-2">
-                            <input id="roomCode" type="text" placeholder="Enter room code" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                            <button id="joinRoom" class="gradient-orange text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
-                                Join
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Active Rooms -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                        <i class="fas fa-door-open text-green-500 mr-2"></i>
-                        Active Rooms
-                    </h3>
-                    <div id="activeRooms" class="space-y-3">
-                        <!-- Active rooms will be populated here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Battle Game Screen -->
-            <div id="battleGameScreen" class="screen hidden">
-                <div class="mb-6">
-                    <div class="flex justify-between items-center">
-                        <button onclick="leaveBattle()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
-                            <i class="fas fa-door-open mr-2"></i>Leave Battle
-                        </button>
-                        <div class="text-center">
-                            <p class="text-sm text-gray-600 dark:text-gray-300">Room Code</p>
-                            <p class="text-xl font-bold text-purple-600" id="battleRoomCode">ABC123</p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-sm text-gray-600 dark:text-gray-300">Question</p>
-                            <p class="text-xl font-bold text-gray-800 dark:text-white"><span id="battleCurrentQuestion">1</span>/10</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Live Leaderboard -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg mb-6">
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-3">
-                        <i class="fas fa-trophy text-yellow-500 mr-2"></i>
-                        Live Rankings
-                    </h3>
-                    <div id="battleLeaderboard" class="space-y-2">
-                        <!-- Battle leaderboard will be populated here -->
-                    </div>
-                </div>
-
-                <!-- Timer and Question -->
-                <div class="text-center mb-6">
-                    <div class="relative inline-block">
-                        <svg class="w-20 h-20 transform -rotate-90">
-                            <circle cx="40" cy="40" r="36" stroke="#e5e7eb" stroke-width="8" fill="transparent"></circle>
-                            <circle id="battleTimerCircle" cx="40" cy="40" r="36" stroke="#f59e0b" stroke-width="8" fill="transparent" 
-                                stroke-dasharray="226" stroke-dashoffset="0" class="timer-ring"></circle>
-                        </svg>
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <span id="battleTimeLeft" class="text-2xl font-bold text-orange-600">15</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
-                    <h3 id="battleQuestionText" class="text-xl font-bold text-gray-800 dark:text-white mb-6">Loading question...</h3>
-                    <div id="battleAnswerOptions" class="space-y-3">
-                        <!-- Battle answer options will be populated here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Organizer Screen -->
-            <div id="organizerScreen" class="screen hidden">
-                <div class="mb-6">
-                    <button onclick="showScreen('homeScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
-                        <i class="fas fa-arrow-left mr-2"></i>Back to Home
-                    </button>
-                </div>
-
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Create & Host Quiz</h2>
-                    <p class="text-gray-600 dark:text-gray-300">Design your own quiz and invite friends to play!</p>
-                </div>
-
-                <!-- Quiz Creation Options -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                            <i class="fas fa-edit text-blue-500 mr-2"></i>
-                            Create Manually
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4">Add questions one by one with custom options</p>
-                        <button onclick="showScreen('createQuizScreen')" class="gradient-bg text-white w-full py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
-                            <i class="fas fa-plus mr-2"></i>Start Creating
-                        </button>
-                    </div>
-
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                            <i class="fas fa-upload text-green-500 mr-2"></i>
-                            Upload CSV/Excel
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4">Import questions from a spreadsheet file</p>
-                        <input type="file" id="csvUpload" accept=".csv,.xlsx,.xls" class="hidden">
-                        <button onclick="document.getElementById('csvUpload').click()" class="gradient-purple text-white w-full py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
-                            <i class="fas fa-file-upload mr-2"></i>Upload File
-                        </button>
-                    </div>
-                </div>
-
-                <!-- My Quizzes -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                        <i class="fas fa-list text-purple-500 mr-2"></i>
-                        My Quizzes
-                    </h3>
-                    <div id="myQuizzes" class="space-y-3">
-                        <!-- User's quizzes will be populated here -->
-                    </div>
-                </div>
-
-                <!-- Premium Features -->
-                <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-6 shadow-lg text-white">
-                    <h3 class="text-xl font-bold mb-2">
-                        <i class="fas fa-crown mr-2"></i>
-                        Premium Organizer Features
-                    </h3>
-                    <p class="mb-4">Unlock unlimited quizzes, advanced analytics, and custom branding!</p>
-                    <div class="flex space-x-4">
-                        <button class="bg-white text-purple-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition-colors">
-                            ₹49/month
-                        </button>
-                        <button class="bg-white text-purple-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition-colors">
-                            ₹10/quiz
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Create Quiz Screen -->
-            <div id="createQuizScreen" class="screen hidden">
-                <div class="mb-6">
-                    <button onclick="showScreen('organizerScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
-                        <i class="fas fa-arrow-left mr-2"></i>Back to Organizer
-                    </button>
-                </div>
-
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Create Your Quiz</h2>
-                    <p class="text-gray-600 dark:text-gray-300">Design engaging questions for your participants</p>
-                </div>
-
-                <!-- Quiz Settings -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Quiz Settings</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quiz Title</label>
-                            <input id="quizTitle" type="text" placeholder="Enter quiz title" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
-                            <select id="quizCategory" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                                <option value="general">General Knowledge</option>
-                                <option value="sports">Sports</option>
-                                <option value="movies">Movies</option>
-                                <option value="history">History</option>
-                                <option value="custom">Custom</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Time per Question (seconds)</label>
-                            <input id="questionTime" type="number" value="15" min="5" max="60" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quiz Mode</label>
-                            <select id="quizMode" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                                <option value="auto">Auto-advance</option>
-                                <option value="manual">Manual control</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Question Builder -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-bold text-gray-800 dark:text-white">Questions</h3>
-                        <button id="addQuestion" class="gradient-bg text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
-                            <i class="fas fa-plus mr-2"></i>Add Question
-                        </button>
-                    </div>
-                    <div id="questionsList" class="space-y-4">
-                        <!-- Questions will be added here -->
-                    </div>
-                </div>
-
-                <!-- Save Quiz -->
-                <div class="text-center">
-                    <button id="saveQuiz" class="gradient-bg text-white px-8 py-3 rounded-lg text-xl font-bold hover:opacity-90 transition-opacity">
-                        <i class="fas fa-save mr-2"></i>Save Quiz
-                    </button>
-                </div>
-            </div>
-
-            <!-- Host Quiz Screen -->
-            <div id="hostQuizScreen" class="screen hidden">
-                <div class="mb-6">
-                    <div class="flex justify-between items-center">
-                        <button onclick="endQuizSession()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
-                            <i class="fas fa-stop mr-2"></i>End Quiz
-                        </button>
-                        <div class="text-center">
-                            <p class="text-sm text-gray-600 dark:text-gray-300">Room Code</p>
-                            <p class="text-2xl font-bold text-purple-600" id="hostRoomCode">QUIZ123</p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-sm text-gray-600 dark:text-gray-300">Players</p>
-                            <p class="text-2xl font-bold text-green-600" id="playerCount">0</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Host Controls -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
-                    <div class="flex justify-center space-x-4">
-                        <button id="nextQuestion" class="gradient-bg text-white px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
-                            <i class="fas fa-forward mr-2"></i>Next Question
-                        </button>
-                        <button id="showResults" class="gradient-orange text-white px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
-                            <i class="fas fa-chart-bar mr-2"></i>Show Results
-                        </button>
-                        <button id="pauseQuiz" class="bg-yellow-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-yellow-600 transition-colors">
-                            <i class="fas fa-pause mr-2"></i>Pause
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Current Question Display -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
-                    <div class="text-center mb-4">
-                        <h3 class="text-sm text-gray-600 dark:text-gray-300">Question <span id="hostCurrentQuestion">1</span> of <span id="hostTotalQuestions">10</span></h3>
-                        <div class="w-32 bg-gray-200 rounded-full h-2 mt-2 mx-auto">
-                            <div id="hostProgress" class="bg-purple-600 h-2 rounded-full progress-bar" style="width: 10%"></div>
-                        </div>
-                    </div>
-                    <h3 id="hostQuestionText" class="text-xl font-bold text-gray-800 dark:text-white text-center mb-6">Waiting to start quiz...</h3>
-                    <div id="hostAnswerOptions" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <!-- Host answer options will be displayed here -->
-                    </div>
-                </div>
-
-                <!-- Live Player Responses -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                        <i class="fas fa-users text-blue-500 mr-2"></i>
-                        Live Responses
-                    </h3>
-                    <div id="liveResponses" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        <!-- Live player responses will be shown here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Leaderboard Screen -->
-            <div id="leaderboardScreen" class="screen hidden">
-                <div class="mb-6">
-                    <button onclick="showScreen('homeScreen')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
-                        <i class="fas fa-arrow-left mr-2"></i>Back to Home
-                    </button>
-                </div>
-
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">
-                        <i class="fas fa-trophy text-yellow-500 mr-2"></i>
-                        Global Leaderboard
-                    </h2>
-                    <p class="text-gray-600 dark:text-gray-300">Top players from around the world</p>
-                </div>
-
-                <!-- Leaderboard Filters -->
-                <div class="flex justify-center space-x-4 mb-6">
-                    <button class="leaderboard-filter bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors" data-filter="all">
-                        All Time
-                    </button>
-                    <button class="leaderboard-filter bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors" data-filter="monthly">
-                        This Month
-                    </button>
-                    <button class="leaderboard-filter bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors" data-filter="weekly">
-                        This Week
-                    </button>
-                </div>
-
-                <!-- Top 3 Podium -->
-                <div class="flex justify-center items-end space-x-4 mb-8">
-                    <!-- 2nd Place -->
-                    <div class="text-center">
-                        <div class="bg-gradient-to-t from-gray-400 to-gray-500 w-20 h-16 rounded-t-lg flex items-end justify-center">
-                            <span class="text-white font-bold text-lg mb-2">2</span>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg mt-2 w-32">
-                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='%236b7280'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L13.5 2.5L16.17 5.17L10.5 10.84L15.16 15.5L17.5 13.16L20.17 15.84L21.5 14.34L19 11.84V9H21Z'/%3E%3C/svg%3E" alt="Player 2" class="w-12 h-12 mx-auto mb-2 rounded-full">
-                            <p class="font-bold text-sm text-gray-800 dark:text-white">Sarah M.</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-300">8,542 XP</p>
-                        </div>
-                    </div>
-
-                    <!-- 1st Place -->
-                    <div class="text-center">
-                        <div class="bg-gradient-to-t from-yellow-400 to-yellow-500 w-24 h-20 rounded-t-lg flex items-end justify-center">
-                            <span class="text-white font-bold text-xl mb-2">1</span>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg mt-2 w-36">
-                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 24 24' fill='%23f59e0b'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L13.5 2.5L16.17 5.17L10.5 10.84L15.16 15.5L17.5 13.16L20.17 15.84L21.5 14.34L19 11.84V9H21Z'/%3E%3C/svg%3E" alt="Player 1" class="w-14 h-14 mx-auto mb-2 rounded-full">
-                            <p class="font-bold text-gray-800 dark:text-white">Alex K.</p>
-                            <p class="text-sm text-gray-600 dark:text-gray-300">12,890 XP</p>
-                            <div class="flex justify-center mt-1">
-                                <i class="fas fa-crown text-yellow-500"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 3rd Place -->
-                    <div class="text-center">
-                        <div class="bg-gradient-to-t from-orange-400 to-orange-500 w-16 h-12 rounded-t-lg flex items-end justify-center">
-                            <span class="text-white font-bold mb-1">3</span>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg mt-2 w-28">
-                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='%236b7280'%3E%3Cpath d='M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L13.5 2.5L16.17 5.17L10.5 10.84L15.16 15.5L17.5 13.16L20.17 15.84L21.5 14.34L19 11.84V9H21Z'/%3E%3C/svg%3E" alt="Player 3" class="w-10 h-10 mx-auto mb-2 rounded-full">
-                            <p class="font-bold text-xs text-gray-800 dark:text-white">Mike R.</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-300">7,234 XP</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Full Leaderboard -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                    <div id="fullLeaderboard" class="space-y-3">
-                        <!-- Full leaderboard will be populated here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Game Results Screen -->
-            <div id="resultsScreen" class="screen hidden">
-                <div class="text-center mb-8">
-                    <div id="resultIcon" class="text-6xl mb-4">
-                        <i class="fas fa-trophy text-yellow-500"></i>
-                    </div>
-                    <h2 id="resultTitle" class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Congratulations!</h2>
-                    <p id="resultSubtitle" class="text-xl text-gray-600 dark:text-gray-300">You've completed the quiz!</p>
-                </div>
-
-                <!-- Score Breakdown -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg text-center">
-                        <i class="fas fa-bullseye text-3xl text-green-500 mb-3"></i>
-                        <p class="text-2xl font-bold text-gray-800 dark:text-white" id="finalScore">0</p>
-                        <p class="text-gray-600 dark:text-gray-300">Final Score</p>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg text-center">
-                        <i class="fas fa-percentage text-3xl text-blue-500 mb-3"></i>
-                        <p class="text-2xl font-bold text-gray-800 dark:text-white" id="accuracyPercent">0%</p>
-                        <p class="text-gray-600 dark:text-gray-300">Accuracy</p>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg text-center">
-                        <i class="fas fa-star text-3xl text-purple-500 mb-3"></i>
-                        <p class="text-2xl font-bold text-gray-800 dark:text-white" id="xpGained">+0</p>
-                        <p class="text-gray-600 dark:text-gray-300">XP Gained</p>
-                    </div>
-                </div>
-
-                <!-- Performance Chart -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Performance Breakdown</h3>
-                    <canvas id="performanceChart" width="400" height="200"></canvas>
-                </div>
-
-                <!-- Share Results -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Share Your Achievement</h3>
-                    <div class="flex justify-center space-x-4">
-                        <button class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors">
-                            <i class="fab fa-whatsapp mr-2"></i>WhatsApp
-                        </button>
-                        <button class="bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600 transition-colors">
-                            <i class="fab fa-instagram mr-2"></i>Instagram
-                        </button>
-                        <button class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors">
-                            <i class="fab fa-twitter mr-2"></i>Twitter
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex justify-center space-x-4">
-                    <button onclick="showScreen('homeScreen')" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors">
-                        <i class="fas fa-home mr-2"></i>Home
-                    </button>
-                    <button onclick="playAgain()" class="gradient-bg text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
-                        <i class="fas fa-redo mr-2"></i>Play Again
-                    </button>
-                </div>
-            </div>
-        </main>
-
-        <!-- Notification System -->
-        <div id="notifications" class="fixed top-20 right-4 z-50 space-y-2">
-            <!-- Notifications will appear here -->
         </div>
 
-        <!-- Confetti Container -->
-        <div id="confetti" class="confetti hidden"></div>
+        <!-- Global Quizzes Screen -->
+        <div id="globalQuizzesScreen" class="screen hidden">
+            <div class="flex items-center mb-6">
+                <button onclick="showScreen('homeScreen')" class="mr-4 text-gray-600 dark:text-gray-300 hover:text-purple-600">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <h2 class="text-3xl font-bold gradient-text">Global Quizzes</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Countries will be populated by JavaScript -->
+            </div>
+        </div>
 
-        <!-- Ad Modal -->
-        <div id="adModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4">
-                <div class="text-center">
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Watch Ad for Reward</h3>
-                    <p class="text-gray-600 dark:text-gray-300 mb-6">Watch a short video to earn bonus coins!</p>
-                    <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-8 mb-6">
-                        <i class="fas fa-play-circle text-6xl text-purple-500"></i>
-                        <p class="mt-2 text-gray-600 dark:text-gray-300">Advertisement Video</p>
+        <!-- Country Topics Screen -->
+        <div id="countryTopicsScreen" class="screen hidden">
+            <div class="flex items-center mb-6">
+                <button onclick="showScreen('globalQuizzesScreen')" class="mr-4 text-gray-600 dark:text-gray-300 hover:text-purple-600">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <h2 class="text-3xl font-bold gradient-text" id="countryTitle">Country</h2>
+            </div>
+            
+            <div id="topicsGrid" class="grid md:grid-cols-2 gap-6">
+                <!-- Topics will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Aspirants Corner Screen -->
+        <div id="aspirantsCornerScreen" class="screen hidden">
+            <div class="flex items-center mb-6">
+                <button onclick="showScreen('homeScreen')" class="mr-4 text-gray-600 dark:text-gray-300 hover:text-purple-600">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <h2 class="text-3xl font-bold gradient-text">Aspirants Corner</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Exams will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Exam Subjects Screen -->
+        <div id="examSubjectsScreen" class="screen hidden">
+            <div class="flex items-center mb-6">
+                <button onclick="showScreen('aspirantsCornerScreen')" class="mr-4 text-gray-600 dark:text-gray-300 hover:text-purple-600">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <h2 class="text-3xl font-bold gradient-text" id="examTitle">Exam</h2>
+            </div>
+            
+            <div id="subjectsGrid" class="grid md:grid-cols-3 gap-6">
+                <!-- Subjects will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="screen hidden">
+            <div class="max-w-2xl mx-auto text-center">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg">
+                    <div id="resultIcon" class="text-6xl mb-4"></div>
+                    <h2 id="resultTitle" class="text-3xl font-bold mb-4"></h2>
+                    <div id="resultStats" class="space-y-2 mb-6">
+                        <!-- Stats will be populated by JavaScript -->
                     </div>
-                    <div class="flex space-x-4">
-                        <button onclick="closeAdModal()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
-                            Skip
+                    <div id="resultMessage" class="text-lg text-gray-600 dark:text-gray-300 mb-6"></div>
+                    <div class="flex justify-center space-x-4">
+                        <button onclick="goHome()" class="gradient-bg text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                            Home
                         </button>
-                        <button onclick="watchAd()" class="gradient-bg text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
-                            Watch (+50 coins)
+                        <button id="retryBtn" onclick="retryQuiz()" class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                            Try Again
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <script>
-        // Global App State
-        let currentUser = {
-            name: 'Player',
-            coins: 1000,
-            xp: 2450,
-            rank: 'Scholar',
-            winRate: 78,
-            gamesPlayed: 156,
-            badges: ['First Win', 'Speed Demon', 'Knowledge Seeker']
+        // Game State
+        let gameState = {
+            playerName: '',
+            currentCategory: '',
+            currentLevel: '',
+            currentCountry: '',
+            currentTopic: '',
+            currentExam: '',
+            currentSubject: '',
+            score: 0,
+            currentQuestionIndex: 0,
+            questions: [],
+            answeredQuestions: [],
+            lifelines: { fiftyFifty: 0, skip: 0 },
+            completedCategories: new Set(),
+            completedLevels: {}
         };
 
-        let currentScreen = 'homeScreen';
-        let isDarkMode = false;
-        let currentQuiz = null;
-        let currentQuestion = 0;
-        let gameScore = 0;
-        let gameTimer = null;
-        let selectedCategory = null;
-        let selectedDifficulty = null;
-        let lifelines = { fiftyFifty: true, skip: true, freeze: true };
+        // Theme Management
+        const themeToggle = document.getElementById('themeToggle');
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
 
-        // Sample Data
-        const sampleQuestions = {
-            general: [
-                {
-                    question: "What is the capital of France?",
-                    options: ["London", "Paris", "Berlin", "Madrid"],
-                    correct: 1,
-                    difficulty: "easy"
-                },
-                {
-                    question: "Which planet is known as the Red Planet?",
-                    options: ["Venus", "Mars", "Jupiter", "Saturn"],
-                    correct: 1,
-                    difficulty: "easy"
-                },
-                {
-                    question: "What is the largest ocean on Earth?",
-                    options: ["Atlantic", "Indian", "Arctic", "Pacific"],
-                    correct: 3,
-                    difficulty: "medium"
-                }
-            ],
-            sports: [
-                {
-                    question: "How many players are on a basketball team on the court?",
-                    options: ["4", "5", "6", "7"],
-                    correct: 1,
-                    difficulty: "easy"
-                },
-                {
-                    question: "Which country has won the most FIFA World Cups?",
-                    options: ["Germany", "Argentina", "Brazil", "Italy"],
-                    correct: 2,
-                    difficulty: "medium"
-                }
-            ],
-            movies: [
-                {
-                    question: "Who directed the movie 'Inception'?",
-                    options: ["Steven Spielberg", "Christopher Nolan", "Martin Scorsese", "Quentin Tarantino"],
-                    correct: 1,
-                    difficulty: "medium"
-                }
-            ],
-            history: [
-                {
-                    question: "In which year did World War II end?",
-                    options: ["1944", "1945", "1946", "1947"],
-                    correct: 1,
-                    difficulty: "easy"
-                }
-            ]
-        };
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark');
+            themeToggle.innerHTML = '<i class="fas fa-moon text-xl"></i>';
+        }
 
-        const leaderboardData = [
-            { name: "Alex K.", xp: 12890, rank: "Guru", avatar: "👨‍💻" },
-            { name: "Sarah M.", xp: 8542, rank: "Scholar", avatar: "👩‍🎓" },
-            { name: "Mike R.", xp: 7234, rank: "Scholar", avatar: "👨‍🏫" },
-            { name: "Lisa T.", xp: 6890, rank: "Expert", avatar: "👩‍💼" },
-            { name: "John D.", xp: 5432, rank: "Expert", avatar: "👨‍🔬" },
-            { name: "Emma W.", xp: 4321, rank: "Rookie", avatar: "👩‍🎨" },
-            { name: "David L.", xp: 3210, rank: "Rookie", avatar: "👨‍⚕️" },
-            { name: "Anna S.", xp: 2100, rank: "Rookie", avatar: "👩‍🏭" }
-        ];
-
-        // Initialize App
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-            populateTopPlayers();
-            populateActiveRooms();
-            populateMyQuizzes();
-            setupEventListeners();
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+            themeToggle.innerHTML = `<i class="fas fa-${isDark ? 'moon' : 'sun'} text-xl"></i>`;
         });
 
-        function initializeApp() {
-            // Load user data from localStorage
-            const savedUser = localStorage.getItem('dimaagwalaUser');
-            if (savedUser) {
-                currentUser = { ...currentUser, ...JSON.parse(savedUser) };
+        // Profile Button
+        document.getElementById('profileBtn').addEventListener('click', () => {
+            alert('Profile feature coming soon! Stay tuned for personalized experience.');
+        });
+
+        // Quiz Data
+        const categories = [
+            { id: 'science', name: 'Science', icon: 'fas fa-atom', color: 'from-blue-400 to-blue-600' },
+            { id: 'tech', name: 'Technology', icon: 'fas fa-laptop-code', color: 'from-green-400 to-green-600' },
+            { id: 'history', name: 'History', icon: 'fas fa-landmark', color: 'from-yellow-400 to-yellow-600' },
+            { id: 'logic', name: 'Logic', icon: 'fas fa-puzzle-piece', color: 'from-purple-400 to-purple-600' },
+            { id: 'general', name: 'General Knowledge', icon: 'fas fa-book', color: 'from-red-400 to-red-600' },
+            { id: 'culture', name: 'Culture', icon: 'fas fa-masks-theater', color: 'from-pink-400 to-pink-600' },
+            { id: 'sports', name: 'Sports', icon: 'fas fa-futbol', color: 'from-orange-400 to-orange-600' },
+            { id: 'entertainment', name: 'Entertainment', icon: 'fas fa-film', color: 'from-indigo-400 to-indigo-600' }
+        ];
+
+        const countries = [
+            { id: 'india', name: 'India', flag: '🇮🇳', topics: ['Indian Sports', 'Indian Politics', 'Know Your Nation'] },
+            { id: 'us', name: 'United States', flag: '🇺🇸', topics: ['US History', 'Pop Culture', 'Tech Giants', 'American States'] },
+            { id: 'uk', name: 'United Kingdom', flag: '🇬🇧', topics: ['British History', 'UK Culture', 'Royal Family'] },
+            { id: 'australia', name: 'Australia', flag: '🇦🇺', topics: ['Australian Wildlife', 'Aussie Culture', 'Sports Down Under'] },
+            { id: 'netherlands', name: 'Netherlands', flag: '🇳🇱', topics: ['Dutch History', 'Art & Culture', 'Modern Netherlands'] },
+            { id: 'ireland', name: 'Ireland', flag: '🇮🇪', topics: ['Irish Heritage', 'Celtic Culture', 'Modern Ireland'] }
+        ];
+
+        const exams = [
+            { id: 'upsc', name: 'UPSC', subjects: ['Polity', 'Geography', 'History', 'Economics', 'Current Affairs'] },
+            { id: 'neet', name: 'NEET', subjects: ['Biology', 'Chemistry', 'Physics'] },
+            { id: 'ssc', name: 'SSC', subjects: ['Reasoning', 'Quantitative Aptitude', 'English', 'General Studies'] },
+            { id: 'jee', name: 'JEE', subjects: ['Mathematics', 'Physics', 'Chemistry'] }
+        ];
+
+        // Sample Questions Database
+        const questionsDatabase = {
+            science: {
+                easy: [
+                    { question: "What is the chemical symbol for water?", options: ["H2O", "CO2", "NaCl", "O2"], correctAnswer: 0, explanation: "Water is composed of two hydrogen atoms and one oxygen atom, hence H2O." },
+                    { question: "Which planet is known as the Red Planet?", options: ["Venus", "Mars", "Jupiter", "Saturn"], correctAnswer: 1, explanation: "Mars appears red due to iron oxide (rust) on its surface." },
+                    { question: "What gas do plants absorb from the atmosphere?", options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"], correctAnswer: 2, explanation: "Plants absorb CO2 during photosynthesis to produce glucose and oxygen." },
+                    { question: "How many bones are in an adult human body?", options: ["206", "208", "210", "204"], correctAnswer: 0, explanation: "An adult human skeleton has 206 bones." },
+                    { question: "What is the fastest land animal?", options: ["Lion", "Cheetah", "Leopard", "Tiger"], correctAnswer: 1, explanation: "Cheetahs can reach speeds up to 70 mph (112 km/h)." },
+                    { question: "Which organ produces insulin?", options: ["Liver", "Kidney", "Pancreas", "Heart"], correctAnswer: 2, explanation: "The pancreas produces insulin to regulate blood sugar levels." },
+                    { question: "What is the hardest natural substance?", options: ["Gold", "Iron", "Diamond", "Silver"], correctAnswer: 2, explanation: "Diamond is the hardest natural substance known to humans." },
+                    { question: "How many chambers does a human heart have?", options: ["2", "3", "4", "5"], correctAnswer: 2, explanation: "The human heart has four chambers: two atria and two ventricles." },
+                    { question: "What is the study of earthquakes called?", options: ["Geology", "Seismology", "Meteorology", "Oceanography"], correctAnswer: 1, explanation: "Seismology is the scientific study of earthquakes and seismic waves." },
+                    { question: "Which vitamin is produced when skin is exposed to sunlight?", options: ["Vitamin A", "Vitamin B", "Vitamin C", "Vitamin D"], correctAnswer: 3, explanation: "Vitamin D is synthesized in the skin when exposed to UVB radiation from sunlight." }
+                ],
+                medium: [
+                    { question: "What is the pH of pure water?", options: ["6", "7", "8", "9"], correctAnswer: 1, explanation: "Pure water has a neutral pH of 7." },
+                    { question: "Which scientist proposed the theory of evolution?", options: ["Newton", "Einstein", "Darwin", "Galileo"], correctAnswer: 2, explanation: "Charles Darwin proposed the theory of evolution through natural selection." },
+                    { question: "What is the powerhouse of the cell?", options: ["Nucleus", "Ribosome", "Mitochondria", "Endoplasmic Reticulum"], correctAnswer: 2, explanation: "Mitochondria produce ATP, the energy currency of cells." },
+                    { question: "What is the speed of light in vacuum?", options: ["3×10⁸ m/s", "3×10⁷ m/s", "3×10⁹ m/s", "3×10⁶ m/s"], correctAnswer: 0, explanation: "The speed of light in vacuum is approximately 3×10⁸ meters per second." },
+                    { question: "Which blood type is known as the universal donor?", options: ["A", "B", "AB", "O"], correctAnswer: 3, explanation: "Type O blood can be given to any blood type, making it the universal donor." },
+                    { question: "What is the most abundant gas in Earth's atmosphere?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Argon"], correctAnswer: 2, explanation: "Nitrogen makes up about 78% of Earth's atmosphere." },
+                    { question: "Which particle has no electric charge?", options: ["Proton", "Electron", "Neutron", "Ion"], correctAnswer: 2, explanation: "Neutrons are electrically neutral particles found in atomic nuclei." },
+                    { question: "What is the chemical formula for methane?", options: ["CH4", "C2H6", "C3H8", "C4H10"], correctAnswer: 0, explanation: "Methane consists of one carbon atom bonded to four hydrogen atoms." },
+                    { question: "Which organelle is responsible for photosynthesis?", options: ["Mitochondria", "Chloroplast", "Nucleus", "Ribosome"], correctAnswer: 1, explanation: "Chloroplasts contain chlorophyll and are the sites of photosynthesis." },
+                    { question: "What is the SI unit of force?", options: ["Joule", "Watt", "Newton", "Pascal"], correctAnswer: 2, explanation: "The Newton is the SI unit of force, named after Sir Isaac Newton." }
+                ],
+                hard: [
+                    { question: "What is the half-life of Carbon-14?", options: ["5,730 years", "4,500 years", "6,200 years", "3,800 years"], correctAnswer: 0, explanation: "Carbon-14 has a half-life of approximately 5,730 years." },
+                    { question: "Which principle explains why airplanes can fly?", options: ["Archimedes' Principle", "Bernoulli's Principle", "Pascal's Principle", "Boyle's Law"], correctAnswer: 1, explanation: "Bernoulli's Principle explains the pressure differences that create lift." },
+                    { question: "What is the molecular geometry of water?", options: ["Linear", "Bent", "Tetrahedral", "Trigonal"], correctAnswer: 1, explanation: "Water has a bent molecular geometry due to lone pairs on oxygen." },
+                    { question: "Which enzyme breaks down starch?", options: ["Pepsin", "Amylase", "Lipase", "Trypsin"], correctAnswer: 1, explanation: "Amylase is the enzyme that breaks down starch into simpler sugars." },
+                    { question: "What is the quantum number that describes electron spin?", options: ["n", "l", "ml", "ms"], correctAnswer: 3, explanation: "The spin quantum number (ms) describes the intrinsic angular momentum of electrons." },
+                    { question: "Which process converts nitrogen gas into ammonia?", options: ["Ostwald Process", "Haber Process", "Contact Process", "Solvay Process"], correctAnswer: 1, explanation: "The Haber Process synthesizes ammonia from nitrogen and hydrogen gases." },
+                    { question: "What is the name of the boundary around a black hole?", options: ["Photon Sphere", "Event Horizon", "Ergosphere", "Schwarzschild Radius"], correctAnswer: 1, explanation: "The event horizon is the boundary beyond which nothing can escape a black hole." },
+                    { question: "Which law states that energy cannot be created or destroyed?", options: ["Newton's First Law", "Law of Conservation of Energy", "Ohm's Law", "Hooke's Law"], correctAnswer: 1, explanation: "The Law of Conservation of Energy states that energy can only be transformed from one form to another." },
+                    { question: "What is the primary structure of a protein?", options: ["Alpha helix", "Beta sheet", "Amino acid sequence", "Quaternary structure"], correctAnswer: 2, explanation: "Primary structure refers to the linear sequence of amino acids in a protein." },
+                    { question: "Which particles mediate the strong nuclear force?", options: ["Photons", "W and Z bosons", "Gluons", "Gravitons"], correctAnswer: 2, explanation: "Gluons are the force-carrying particles of the strong nuclear force." }
+                ]
+            },
+            tech: {
+                easy: [
+                    { question: "What does CPU stand for?", options: ["Central Processing Unit", "Computer Personal Unit", "Central Program Unit", "Computer Processing Unit"], correctAnswer: 0, explanation: "CPU stands for Central Processing Unit, the brain of a computer." },
+                    { question: "Which company created the iPhone?", options: ["Samsung", "Google", "Apple", "Microsoft"], correctAnswer: 2, explanation: "Apple Inc. created and manufactures the iPhone." },
+                    { question: "What does WWW stand for?", options: ["World Wide Web", "World Web Wide", "Wide World Web", "Web World Wide"], correctAnswer: 0, explanation: "WWW stands for World Wide Web, the information system on the Internet." },
+                    { question: "Which programming language is known for web development?", options: ["C++", "Java", "JavaScript", "Python"], correctAnswer: 2, explanation: "JavaScript is primarily used for web development and runs in browsers." },
+                    { question: "What does RAM stand for?", options: ["Random Access Memory", "Read Access Memory", "Rapid Access Memory", "Real Access Memory"], correctAnswer: 0, explanation: "RAM stands for Random Access Memory, temporary storage for running programs." },
+                    { question: "Which social media platform has a character limit for posts?", options: ["Facebook", "Instagram", "Twitter", "LinkedIn"], correctAnswer: 2, explanation: "Twitter (now X) famously had a 280-character limit for tweets." },
+                    { question: "What is the most popular search engine?", options: ["Bing", "Yahoo", "Google", "DuckDuckGo"], correctAnswer: 2, explanation: "Google is the world's most popular search engine with over 90% market share." },
+                    { question: "Which company developed Android OS?", options: ["Apple", "Microsoft", "Google", "Samsung"], correctAnswer: 2, explanation: "Google developed the Android operating system." },
+                    { question: "What does AI stand for?", options: ["Artificial Intelligence", "Automated Intelligence", "Advanced Intelligence", "Augmented Intelligence"], correctAnswer: 0, explanation: "AI stands for Artificial Intelligence, computer systems that can perform tasks typically requiring human intelligence." },
+                    { question: "Which protocol is used to transfer web pages?", options: ["FTP", "SMTP", "HTTP", "TCP"], correctAnswer: 2, explanation: "HTTP (HyperText Transfer Protocol) is used to transfer web pages over the internet." }
+                ],
+                medium: [
+                    { question: "What is the time complexity of binary search?", options: ["O(n)", "O(log n)", "O(n²)", "O(1)"], correctAnswer: 1, explanation: "Binary search has O(log n) time complexity as it divides the search space in half each iteration." },
+                    { question: "Which database type is MongoDB?", options: ["Relational", "NoSQL", "Graph", "Columnar"], correctAnswer: 1, explanation: "MongoDB is a NoSQL document database that stores data in flexible, JSON-like documents." },
+                    { question: "What does API stand for?", options: ["Application Programming Interface", "Advanced Programming Interface", "Application Process Interface", "Automated Programming Interface"], correctAnswer: 0, explanation: "API stands for Application Programming Interface, allowing different software applications to communicate." },
+                    { question: "Which design pattern ensures only one instance of a class?", options: ["Factory", "Observer", "Singleton", "Strategy"], correctAnswer: 2, explanation: "The Singleton pattern ensures a class has only one instance and provides global access to it." },
+                    { question: "What is the default port for HTTPS?", options: ["80", "443", "21", "25"], correctAnswer: 1, explanation: "HTTPS uses port 443 by default for secure web communication." },
+                    { question: "Which algorithm is used in Git for version control?", options: ["SHA-1", "MD5", "SHA-256", "CRC32"], correctAnswer: 0, explanation: "Git uses SHA-1 hashing algorithm to generate unique identifiers for commits." },
+                    { question: "What does CRUD stand for in database operations?", options: ["Create, Read, Update, Delete", "Copy, Read, Update, Delete", "Create, Remove, Update, Delete", "Create, Read, Upload, Delete"], correctAnswer: 0, explanation: "CRUD stands for Create, Read, Update, Delete - the four basic database operations." },
+                    { question: "Which JavaScript framework was developed by Facebook?", options: ["Angular", "Vue.js", "React", "Ember.js"], correctAnswer: 2, explanation: "React was developed by Facebook (now Meta) for building user interfaces." },
+                    { question: "What is the purpose of a firewall?", options: ["Speed up internet", "Block malicious traffic", "Compress data", "Store passwords"], correctAnswer: 1, explanation: "A firewall monitors and controls incoming and outgoing network traffic to block malicious activities." },
+                    { question: "Which sorting algorithm has the best worst-case time complexity?", options: ["Quick Sort", "Bubble Sort", "Merge Sort", "Selection Sort"], correctAnswer: 2, explanation: "Merge Sort has O(n log n) worst-case time complexity, which is optimal for comparison-based sorting." }
+                ],
+                hard: [
+                    { question: "What is the CAP theorem in distributed systems?", options: ["Consistency, Availability, Partition tolerance", "Concurrency, Atomicity, Persistence", "Caching, Authentication, Performance", "Compression, Aggregation, Partitioning"], correctAnswer: 0, explanation: "CAP theorem states that distributed systems can only guarantee two of three: Consistency, Availability, and Partition tolerance." },
+                    { question: "Which consensus algorithm is used by Bitcoin?", options: ["PBFT", "Raft", "Proof of Work", "Proof of Stake"], correctAnswer: 2, explanation: "Bitcoin uses Proof of Work consensus algorithm where miners compete to solve cryptographic puzzles." },
+                    { question: "What is the difference between TCP and UDP?", options: ["TCP is faster", "UDP is reliable", "TCP is connection-oriented", "UDP uses more bandwidth"], correctAnswer: 2, explanation: "TCP is connection-oriented and reliable, while UDP is connectionless and faster but unreliable." },
+                    { question: "Which data structure is used to implement LRU cache?", options: ["Array", "Linked List", "Hash Map + Doubly Linked List", "Binary Tree"], correctAnswer: 2, explanation: "LRU cache is efficiently implemented using a combination of hash map and doubly linked list." },
+                    { question: "What is eventual consistency in NoSQL databases?", options: ["Data is always consistent", "Data becomes consistent over time", "Data is never consistent", "Data consistency is guaranteed"], correctAnswer: 1, explanation: "Eventual consistency means the system will become consistent over time, without guaranteeing immediate consistency." },
+                    { question: "Which architectural pattern does microservices follow?", options: ["Monolithic", "Service-Oriented Architecture", "Layered Architecture", "Event-Driven Architecture"], correctAnswer: 1, explanation: "Microservices follow Service-Oriented Architecture principles with fine-grained, independently deployable services." },
+                    { question: "What is the purpose of a reverse proxy?", options: ["Hide client identity", "Load balancing and caching", "Encrypt data", "Store user sessions"], correctAnswer: 1, explanation: "Reverse proxy sits between clients and servers, providing load balancing, caching, and SSL termination." },
+                    { question: "Which principle states that software entities should be open for extension but closed for modification?", options: ["Single Responsibility", "Open/Closed Principle", "Liskov Substitution", "Dependency Inversion"], correctAnswer: 1, explanation: "The Open/Closed Principle is one of the SOLID principles stating classes should be open for extension but closed for modification." },
+                    { question: "What is the Byzantine Generals Problem?", options: ["Network latency issue", "Distributed consensus problem", "Memory management problem", "Scheduling algorithm"], correctAnswer: 1, explanation: "The Byzantine Generals Problem deals with achieving consensus in distributed systems where some nodes may be malicious or unreliable." },
+                    { question: "Which theorem proves that certain problems cannot be solved by any algorithm?", options: ["Gödel's Incompleteness", "Church-Turing Thesis", "Halting Problem", "Rice's Theorem"], correctAnswer: 2, explanation: "The Halting Problem proves that there's no general algorithm to determine if a program will halt or run forever." }
+                ]
+            },
+            // Add more categories here (history, logic, general, culture, sports, entertainment)
+            history: {
+                easy: [
+                    { question: "Who was the first President of the United States?", options: ["Thomas Jefferson", "George Washington", "John Adams", "Benjamin Franklin"], correctAnswer: 1, explanation: "George Washington was the first President of the United States, serving from 1789 to 1797." },
+                    { question: "In which year did World War II end?", options: ["1944", "1945", "1946", "1947"], correctAnswer: 1, explanation: "World War II ended in 1945 with Japan's surrender in September." },
+                    { question: "Which ancient wonder of the world was located in Egypt?", options: ["Hanging Gardens", "Colossus of Rhodes", "Great Pyramid of Giza", "Lighthouse of Alexandria"], correctAnswer: 2, explanation: "The Great Pyramid of Giza is the only surviving ancient wonder of the world." },
+                    { question: "Who painted the Mona Lisa?", options: ["Michelangelo", "Leonardo da Vinci", "Raphael", "Donatello"], correctAnswer: 1, explanation: "Leonardo da Vinci painted the Mona Lisa between 1503 and 1519." },
+                    { question: "Which empire was ruled by Julius Caesar?", options: ["Greek Empire", "Roman Empire", "Persian Empire", "Byzantine Empire"], correctAnswer: 1, explanation: "Julius Caesar was a Roman general and statesman who played a critical role in the Roman Empire." },
+                    { question: "In which year did the Berlin Wall fall?", options: ["1987", "1988", "1989", "1990"], correctAnswer: 2, explanation: "The Berlin Wall fell on November 9, 1989, marking the beginning of German reunification." },
+                    { question: "Who discovered America in 1492?", options: ["Vasco da Gama", "Christopher Columbus", "Marco Polo", "Ferdinand Magellan"], correctAnswer: 1, explanation: "Christopher Columbus reached the Americas in 1492, though he thought he had reached Asia." },
+                    { question: "Which revolution began in France in 1789?", options: ["Industrial Revolution", "French Revolution", "American Revolution", "Russian Revolution"], correctAnswer: 1, explanation: "The French Revolution began in 1789 and lasted until 1799, fundamentally changing French society." },
+                    { question: "Who was known as the 'Iron Lady'?", options: ["Queen Elizabeth II", "Margaret Thatcher", "Indira Gandhi", "Golda Meir"], correctAnswer: 1, explanation: "Margaret Thatcher, UK Prime Minister from 1979-1990, was nicknamed the 'Iron Lady'." },
+                    { question: "Which war was fought between North and South in America?", options: ["Revolutionary War", "Civil War", "War of 1812", "Spanish-American War"], correctAnswer: 1, explanation: "The American Civil War (1861-1865) was fought between the Northern and Southern states." }
+                ],
+                medium: [
+                    { question: "Which treaty ended World War I?", options: ["Treaty of Versailles", "Treaty of Paris", "Treaty of Vienna", "Treaty of Westphalia"], correctAnswer: 0, explanation: "The Treaty of Versailles, signed in 1919, officially ended World War I between Germany and the Allied Powers." },
+                    { question: "Who was the last Tsar of Russia?", options: ["Alexander III", "Nicholas II", "Peter the Great", "Ivan the Terrible"], correctAnswer: 1, explanation: "Nicholas II was the last Tsar of Russia, ruling from 1894 until his abdication in 1917." },
+                    { question: "Which civilization built Machu Picchu?", options: ["Aztecs", "Mayans", "Incas", "Olmecs"], correctAnswer: 2, explanation: "The Inca civilization built Machu Picchu in the 15th century in present-day Peru." },
+                    { question: "In which year did the Titanic sink?", options: ["1910", "1911", "1912", "1913"], correctAnswer: 2, explanation: "The RMS Titanic sank on April 15, 1912, during its maiden voyage from Southampton to New York." },
+                    { question: "Who wrote 'The Art of War'?", options: ["Confucius", "Sun Tzu", "Lao Tzu", "Mencius"], correctAnswer: 1, explanation: "Sun Tzu wrote 'The Art of War', an ancient Chinese military treatise dating from the 5th century BC." },
+                    { question: "Which dynasty ruled China for the longest time?", options: ["Ming Dynasty", "Qing Dynasty", "Tang Dynasty", "Zhou Dynasty"], correctAnswer: 3, explanation: "The Zhou Dynasty ruled China for about 800 years (1046-256 BC), making it the longest-lasting dynasty." },
+                    { question: "What was the name of the ship on which Charles Darwin made his famous voyage?", options: ["HMS Victory", "HMS Beagle", "HMS Endeavour", "HMS Bounty"], correctAnswer: 1, explanation: "Charles Darwin traveled on HMS Beagle from 1831-1836, leading to his theory of evolution." },
+                    { question: "Which ancient Greek philosopher taught Alexander the Great?", options: ["Socrates", "Plato", "Aristotle", "Pythagoras"], correctAnswer: 2, explanation: "Aristotle was Alexander the Great's tutor, teaching him philosophy, politics, and sciences." },
+                    { question: "What was the capital of the Byzantine Empire?", options: ["Athens", "Rome", "Constantinople", "Alexandria"], correctAnswer: 2, explanation: "Constantinople (modern-day Istanbul) was the capital of the Byzantine Empire for over 1,000 years." },
+                    { question: "Which explorer first reached the South Pole?", options: ["Ernest Shackleton", "Robert Falcon Scott", "Roald Amundsen", "Richard Byrd"], correctAnswer: 2, explanation: "Norwegian explorer Roald Amundsen reached the South Pole on December 14, 1911." }
+                ],
+                hard: [
+                    { question: "Which battle is considered the turning point of World War II in the Pacific?", options: ["Battle of Pearl Harbor", "Battle of Midway", "Battle of Guadalcanal", "Battle of Iwo Jima"], correctAnswer: 1, explanation: "The Battle of Midway (June 4-7, 1942) is considered the turning point as it crippled the Japanese Navy." },
+                    { question: "What was the primary cause of the Thirty Years' War?", options: ["Trade disputes", "Religious conflicts", "Territorial expansion", "Succession crisis"], correctAnswer: 1, explanation: "The Thirty Years' War (1618-1648) was primarily a religious conflict between Catholic and Protestant states." },
+                    { question: "Who was the founder of the Mongol Empire?", options: ["Kublai Khan", "Ögedei Khan", "Genghis Khan", "Möngke Khan"], correctAnswer: 2, explanation: "Genghis Khan founded the Mongol Empire in 1206, which became the largest contiguous empire in history." },
+                    { question: "Which document established the principle of habeas corpus in England?", options: ["Magna Carta", "English Bill of Rights", "Habeas Corpus Act", "Petition of Right"], correctAnswer: 2, explanation: "The Habeas Corpus Act of 1679 formally established the right to challenge unlawful detention." },
+                    { question: "What was the name of the secret police in Nazi Germany?", options: ["SS", "SA", "Gestapo", "SD"], correctAnswer: 2, explanation: "The Gestapo was the official secret police of Nazi Germany, responsible for investigating political crimes." },
+                    { question: "Which civilization created the first known writing system?", options: ["Egyptians", "Sumerians", "Chinese", "Phoenicians"], correctAnswer: 1, explanation: "The Sumerians developed cuneiform, the first known writing system, around 3200 BC." },
+                    { question: "What was the main cause of the Black Death in 14th century Europe?", options: ["Typhus", "Cholera", "Bubonic plague", "Smallpox"], correctAnswer: 2, explanation: "The Black Death was caused by the bubonic plague bacterium Yersinia pestis, killing 30-60% of Europe's population." },
+                    { question: "Which treaty divided the New World between Spain and Portugal?", options: ["Treaty of Tordesillas", "Treaty of Madrid", "Treaty of San Ildefonso", "Treaty of Badajoz"], correctAnswer: 0, explanation: "The Treaty of Tordesillas (1494) divided newly discovered lands between Spain and Portugal." },
+                    { question: "Who was the first woman to rule Egypt as pharaoh?", options: ["Cleopatra", "Nefertiti", "Hatshepsut", "Ankhesenamun"], correctAnswer: 2, explanation: "Hatshepsut was the first woman to become pharaoh, ruling Egypt for about 22 years (1479-1458 BC)." },
+                    { question: "Which battle ended Napoleon's Hundred Days?", options: ["Battle of Leipzig", "Battle of Waterloo", "Battle of Austerlitz", "Battle of Borodino"], correctAnswer: 1, explanation: "The Battle of Waterloo (June 18, 1815) ended Napoleon's Hundred Days and his political career." }
+                ]
             }
+        };
 
-            // Load theme preference
-            const savedTheme = localStorage.getItem('dimaagwalaTheme');
-            if (savedTheme === 'dark') {
-                toggleTheme();
+        // Add questions for other categories and global quizzes
+        const globalQuestions = {
+            india: {
+                'Indian Sports': [
+                    { question: "Which Indian cricketer is known as 'Captain Cool'?", options: ["Virat Kohli", "Rohit Sharma", "MS Dhoni", "Sourav Ganguly"], correctAnswer: 2, explanation: "MS Dhoni is nicknamed 'Captain Cool' for his calm demeanor under pressure." },
+                    { question: "In which year did India win its first Cricket World Cup?", options: ["1983", "1987", "1996", "2011"], correctAnswer: 0, explanation: "India won its first Cricket World Cup in 1983 under Kapil Dev's captaincy." },
+                    { question: "Which Indian badminton player won Olympic silver in 2016?", options: ["Saina Nehwal", "P.V. Sindhu", "Carolina Marin", "Tai Tzu-ying"], correctAnswer: 1, explanation: "P.V. Sindhu won the silver medal in badminton at the 2016 Rio Olympics." },
+                    { question: "What is India's national sport?", options: ["Cricket", "Hockey", "Kabaddi", "Football"], correctAnswer: 1, explanation: "Hockey is considered India's national sport, though cricket is more popular." },
+                    { question: "Which Indian chess player became World Champion in 2013?", options: ["Viswanathan Anand", "Vidit Gujrathi", "Pentala Harikrishna", "Koneru Humpy"], correctAnswer: 0, explanation: "Viswanathan Anand won the World Chess Championship multiple times, including 2013." }
+                ],
+                'Indian Politics': [
+                    { question: "Who was India's first Prime Minister?", options: ["Mahatma Gandhi", "Jawaharlal Nehru", "Sardar Patel", "Subhas Chandra Bose"], correctAnswer: 1, explanation: "Jawaharlal Nehru was India's first Prime Minister from 1947 to 1964." },
+                    { question: "Which article of the Indian Constitution deals with Right to Education?", options: ["Article 19", "Article 21A", "Article 25", "Article 32"], correctAnswer: 1, explanation: "Article 21A makes free and compulsory education a fundamental right for children aged 6-14." },
+                    { question: "How many states are there in India currently?", options: ["28", "29", "30", "31"], correctAnswer: 0, explanation: "India currently has 28 states and 8 union territories." },
+                    { question: "Who is known as the 'Iron Man of India'?", options: ["Jawaharlal Nehru", "Sardar Vallabhbhai Patel", "Mahatma Gandhi", "B.R. Ambedkar"], correctAnswer: 1, explanation: "Sardar Vallabhbhai Patel is called the 'Iron Man of India' for uniting the princely states." },
+                    { question: "Which house of Parliament is called the 'House of Elders'?", options: ["Lok Sabha", "Rajya Sabha", "Legislative Assembly", "Legislative Council"], correctAnswer: 1, explanation: "Rajya Sabha is called the 'House of Elders' or the Upper House of Parliament." }
+                ]
+            },
+            us: {
+                'US History': [
+                    { question: "Which amendment gave women the right to vote?", options: ["18th Amendment", "19th Amendment", "20th Amendment", "21st Amendment"], correctAnswer: 1, explanation: "The 19th Amendment, ratified in 1920, gave women the right to vote." },
+                    { question: "Who was president during the Civil War?", options: ["George Washington", "Thomas Jefferson", "Abraham Lincoln", "Theodore Roosevelt"], correctAnswer: 2, explanation: "Abraham Lincoln was president during the American Civil War (1861-1865)." },
+                    { question: "Which purchase doubled the size of the United States?", options: ["Alaska Purchase", "Louisiana Purchase", "Gadsden Purchase", "Florida Purchase"], correctAnswer: 1, explanation: "The Louisiana Purchase in 1803 doubled the size of the United States." },
+                    { question: "What was the first permanent English settlement in America?", options: ["Plymouth", "Jamestown", "Roanoke", "Boston"], correctAnswer: 1, explanation: "Jamestown, Virginia, established in 1607, was the first permanent English settlement." },
+                    { question: "Which war was fought over the expansion of slavery?", options: ["Revolutionary War", "War of 1812", "Civil War", "Spanish-American War"], correctAnswer: 2, explanation: "The Civil War was primarily fought over slavery and states' rights." }
+                ],
+                'Pop Culture': [
+                    { question: "Which streaming service created 'Stranger Things'?", options: ["Amazon Prime", "Netflix", "Hulu", "Disney+"], correctAnswer: 1, explanation: "Netflix created and produces the hit series 'Stranger Things'." },
+                    { question: "Who performed at the 2020 Super Bowl halftime show?", options: ["Beyoncé", "Jennifer Lopez & Shakira", "Lady Gaga", "The Weeknd"], correctAnswer: 1, explanation: "Jennifer Lopez and Shakira performed together at Super Bowl LIV halftime show." },
+                    { question: "Which social media app was almost banned in the US in 2020?", options: ["Instagram", "TikTok", "Snapchat", "Twitter"], correctAnswer: 1, explanation: "TikTok faced potential bans in the US due to security concerns." },
+                    { question: "What movie won the Oscar for Best Picture in 2020?", options: ["1917", "Joker", "Parasite", "Once Upon a Time in Hollywood"], correctAnswer: 2, explanation: "Parasite won Best Picture, becoming the first non-English film to do so." },
+                    { question: "Which Marvel movie was the highest-grossing film of all time?", options: ["Avengers: Infinity War", "Avengers: Endgame", "Black Panther", "Spider-Man: No Way Home"], correctAnswer: 1, explanation: "Avengers: Endgame became the highest-grossing film of all time." }
+                ]
             }
+        };
 
-            updateUserDisplay();
-            showScreen('homeScreen');
-        }
+        const aspirantsQuestions = {
+            upsc: {
+                'Polity': [
+                    { question: "Which article deals with the procedure for amendment of the Constitution?", options: ["Article 356", "Article 368", "Article 370", "Article 375"], correctAnswer: 1, explanation: "Article 368 deals with the power and procedure for constitutional amendments." },
+                    { question: "Who is the constitutional head of the state government?", options: ["Chief Minister", "Governor", "President", "Prime Minister"], correctAnswer: 1, explanation: "The Governor is the constitutional head of the state government." },
+                    { question: "Which schedule of the Constitution deals with languages?", options: ["7th Schedule", "8th Schedule", "9th Schedule", "10th Schedule"], correctAnswer: 1, explanation: "The 8th Schedule lists the 22 official languages of India." },
+                    { question: "What is the minimum age to become a member of Rajya Sabha?", options: ["25 years", "30 years", "35 years", "40 years"], correctAnswer: 1, explanation: "The minimum age to become a Rajya Sabha member is 30 years." },
+                    { question: "Which writ is called the 'bulwark of personal freedom'?", options: ["Mandamus", "Habeas Corpus", "Certiorari", "Prohibition"], correctAnswer: 1, explanation: "Habeas Corpus protects against unlawful detention and is called the bulwark of personal freedom." }
+                ],
+                'Geography': [
+                    { question: "Which river is known as the 'Sorrow of Bengal'?", options: ["Ganga", "Damodar", "Hooghly", "Brahmaputra"], correctAnswer: 1, explanation: "The Damodar River was called 'Sorrow of Bengal' due to frequent flooding before dam construction." },
+                    { question: "Which is the highest peak in the Western Ghats?", options: ["Anai Mudi", "Doddabetta", "Kalsubai", "Mahendragiri"], correctAnswer: 0, explanation: "Anai Mudi in Kerala is the highest peak in the Western Ghats at 2,695 meters." },
+                    { question: "Which latitude passes through the middle of India?", options: ["Equator", "Tropic of Cancer", "Tropic of Capricorn", "Arctic Circle"], correctAnswer: 1, explanation: "The Tropic of Cancer (23°30'N) passes through the middle of India." },
+                    { question: "Which state has the longest coastline in India?", options: ["Tamil Nadu", "Gujarat", "Andhra Pradesh", "Maharashtra"], correctAnswer: 1, explanation: "Gujarat has the longest coastline in India, stretching about 1,600 km." },
+                    { question: "Which soil is known as 'Regur'?", options: ["Alluvial soil", "Black soil", "Red soil", "Laterite soil"], correctAnswer: 1, explanation: "Black soil is also known as Regur soil, found mainly in the Deccan plateau." }
+                ]
+            },
+            neet: {
+                'Biology': [
+                    { question: "Which organelle is known as the 'suicide bag' of the cell?", options: ["Ribosome", "Lysosome", "Mitochondria", "Endoplasmic Reticulum"], correctAnswer: 1, explanation: "Lysosomes contain digestive enzymes and can break down cellular components, hence called 'suicide bags'." },
+                    { question: "What is the functional unit of the kidney?", options: ["Neuron", "Nephron", "Alveolus", "Villus"], correctAnswer: 1, explanation: "The nephron is the functional unit of the kidney, responsible for filtration and urine formation." },
+                    { question: "Which hormone regulates blood sugar levels?", options: ["Thyroxine", "Insulin", "Adrenaline", "Growth Hormone"], correctAnswer: 1, explanation: "Insulin, produced by the pancreas, regulates blood glucose levels." },
+                    { question: "What is the chromosome number in human gametes?", options: ["46", "23", "22", "44"], correctAnswer: 1, explanation: "Human gametes (sperm and egg cells) have 23 chromosomes (haploid number)." },
+                    { question: "Which process occurs in the ribosomes?", options: ["DNA replication", "Transcription", "Translation", "Cell division"], correctAnswer: 2, explanation: "Translation, the process of protein synthesis from mRNA, occurs in ribosomes." }
+                ],
+                'Chemistry': [
+                    { question: "What is the atomic number of carbon?", options: ["4", "6", "8", "12"], correctAnswer: 1, explanation: "Carbon has an atomic number of 6, meaning it has 6 protons in its nucleus." },
+                    { question: "Which gas is evolved when zinc reacts with dilute HCl?", options: ["Oxygen", "Hydrogen", "Chlorine", "Carbon dioxide"], correctAnswer: 1, explanation: "When zinc reacts with dilute hydrochloric acid, hydrogen gas is evolved." },
+                    { question: "What is the molecular formula of benzene?", options: ["C6H6", "C6H12", "C6H14", "C6H10"], correctAnswer: 0, explanation: "Benzene has the molecular formula C6H6 with a ring structure." },
+                    { question: "Which element has the highest electronegativity?", options: ["Oxygen", "Nitrogen", "Fluorine", "Chlorine"], correctAnswer: 2, explanation: "Fluorine has the highest electronegativity value of 4.0 on the Pauling scale." },
+                    { question: "What type of bond is formed between H and F in HF?", options: ["Ionic bond", "Covalent bond", "Metallic bond", "Hydrogen bond"], correctAnswer: 1, explanation: "HF has a polar covalent bond between hydrogen and fluorine atoms." }
+                ]
+            }
+        };
 
-        function setupEventListeners() {
-            // Theme toggle
-            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-
-            // Category selection
-            document.querySelectorAll('.category-card').forEach(card => {
-                card.addEventListener('click', function() {
-                    selectedCategory = this.dataset.category;
-                    document.querySelectorAll('.category-card').forEach(c => c.classList.remove('ring-2', 'ring-purple-500'));
-                    this.classList.add('ring-2', 'ring-purple-500');
-                    checkSoloGameStart();
-                });
-            });
-
-            // Difficulty selection
-            document.querySelectorAll('.difficulty-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    selectedDifficulty = this.dataset.difficulty;
-                    document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('ring-2', 'ring-white'));
-                    this.classList.add('ring-2', 'ring-white');
-                    checkSoloGameStart();
-                });
-            });
-
-            // Start solo game
-            document.getElementById('startSoloGame').addEventListener('click', startSoloGame);
-
-            // Battle mode
-            document.getElementById('quickMatch').addEventListener('click', startQuickMatch);
-            document.getElementById('joinRoom').addEventListener('click', joinBattleRoom);
-
-            // Quiz creation
-            document.getElementById('addQuestion').addEventListener('click', addQuestionForm);
-            document.getElementById('saveQuiz').addEventListener('click', saveQuiz);
-
-            // CSV upload
-            document.getElementById('csvUpload').addEventListener('change', handleCSVUpload);
-
-            // Lifelines
-            document.getElementById('lifeline5050').addEventListener('click', use5050);
-            document.getElementById('lifelineSkip').addEventListener('click', useSkip);
-            document.getElementById('lifelineFreeze').addEventListener('click', useFreeze);
-
-            // Leaderboard filter
-            document.querySelectorAll('.leaderboard-filter').forEach(filter => {
-                filter.addEventListener('click', function() {
-                    document.querySelectorAll('.leaderboard-filter').forEach(f => {
-                        f.classList.remove('bg-purple-500', 'text-white');
-                        f.classList.add('bg-gray-300', 'text-gray-700');
-                    });
-                    this.classList.remove('bg-gray-300', 'text-gray-700');
-                    this.classList.add('bg-purple-500', 'text-white');
-                    populateLeaderboard(this.dataset.filter);
-                });
-            });
-        }
-
+        // Screen Management
         function showScreen(screenId) {
-            // Hide all screens
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.add('hidden');
             });
-
-            // Show target screen
             document.getElementById(screenId).classList.remove('hidden');
-            currentScreen = screenId;
-
-            // Initialize screen-specific data
-            if (screenId === 'leaderboardScreen') {
-                populateLeaderboard('all');
-            }
+            document.getElementById(screenId).classList.add('slide-in');
         }
 
-        function toggleTheme() {
-            isDarkMode = !isDarkMode;
-            const body = document.body;
-            const themeIcon = document.querySelector('#themeToggle i');
-            
-            if (isDarkMode) {
-                body.classList.add('dark');
-                themeIcon.classList.remove('fa-moon');
-                themeIcon.classList.add('fa-sun');
-            } else {
-                body.classList.remove('dark');
-                themeIcon.classList.remove('fa-sun');
-                themeIcon.classList.add('fa-moon');
-            }
-
-            localStorage.setItem('dimaagwalaTheme', isDarkMode ? 'dark' : 'light');
-        }
-
-        function updateUserDisplay() {
-            document.getElementById('userName').textContent = currentUser.name;
-            document.getElementById('userCoins').textContent = currentUser.coins;
-            document.getElementById('userRank').textContent = currentUser.rank;
-            document.getElementById('userXP').textContent = currentUser.xp.toLocaleString();
-            document.getElementById('winRate').textContent = currentUser.winRate + '%';
-        }
-
-        function saveUserData() {
-            localStorage.setItem('dimaagwalaUser', JSON.stringify(currentUser));
-        }
-
-        function populateTopPlayers() {
-            const container = document.getElementById('topPlayers');
-            const topThree = leaderboardData.slice(0, 3);
-            
-            container.innerHTML = topThree.map((player, index) => `
-                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center ${
-                            index === 0 ? 'bg-yellow-500' : 
-                            index === 1 ? 'bg-gray-400' : 'bg-orange-500'
-                        } text-white font-bold">
-                            ${index + 1}
-                        </div>
-                        <div>
-                            <p class="font-semibold text-gray-800 dark:text-white">${player.name}</p>
-                            <p class="text-sm text-gray-600 dark:text-gray-300">${player.rank}</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-bold text-purple-600">${player.xp.toLocaleString()}</p>
-                        <p class="text-xs text-gray-500">XP</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function populateActiveRooms() {
-            const container = document.getElementById('activeRooms');
-            const rooms = [
-                { code: 'ABC123', players: 8, category: 'General', host: 'QuizMaster99' },
-                { code: 'XYZ789', players: 12, category: 'Sports', host: 'SportsFan21' },
-                { code: 'DEF456', players: 5, category: 'Movies', host: 'CinemaLover' }
-            ];
-
-            container.innerHTML = rooms.map(room => `
-                <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer" onclick="joinSpecificRoom('${room.code}')">
-                    <div>
-                        <p class="font-semibold text-gray-800 dark:text-white">Room ${room.code}</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-300">${room.category} • Hosted by ${room.host}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-sm font-medium text-purple-600">${room.players} players</p>
-                        <button class="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded mt-1">Join</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function populateMyQuizzes() {
-            const container = document.getElementById('myQuizzes');
-            const quizzes = [
-                { title: 'My Science Quiz', questions: 15, plays: 42, created: '2 days ago' },
-                { title: 'History Challenge', questions: 20, plays: 28, created: '1 week ago' },
-                { title: 'Movie Trivia', questions: 12, plays: 67, created: '2 weeks ago' }
-            ];
-
-            container.innerHTML = quizzes.map(quiz => `
-                <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
-                    <div>
-                        <p class="font-semibold text-gray-800 dark:text-white">${quiz.title}</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-300">${quiz.questions} questions • ${quiz.plays} plays • Created ${quiz.created}</p>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button class="text-sm bg-blue-100 text-blue-600 px-3 py-1 rounded hover:bg-blue-200 transition-colors">
-                            <i class="fas fa-edit mr-1"></i>Edit
-                        </button>
-                        <button class="text-sm bg-green-100 text-green-600 px-3 py-1 rounded hover:bg-green-200 transition-colors" onclick="hostQuiz('${quiz.title}')">
-                            <i class="fas fa-play mr-1"></i>Host
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function populateLeaderboard(filter) {
-            const container = document.getElementById('fullLeaderboard');
-            let data = [...leaderboardData];
-
-            // Apply filter logic here
-            if (filter === 'monthly') {
-                data = data.map(player => ({ ...player, xp: Math.floor(player.xp * 0.3) }));
-            } else if (filter === 'weekly') {
-                data = data.map(player => ({ ...player, xp: Math.floor(player.xp * 0.1) }));
-            }
-
-            container.innerHTML = data.map((player, index) => `
-                <div class="leaderboard-item flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-600 last:border-b-0" style="animation-delay: ${index * 0.1}s">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
-                            index < 3 ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gray-400'
-                        }">
-                            ${index + 1}
-                        </div>
-                        <div>
-                            <p class="font-semibold text-gray-800 dark:text-white">${player.name}</p>
-                            <p class="text-sm text-gray-600 dark:text-gray-300">${player.rank}</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-bold text-purple-600">${player.xp.toLocaleString()}</p>
-                        <p class="text-xs text-gray-500">XP</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function checkSoloGameStart() {
-            const startBtn = document.getElementById('startSoloGame');
-            if (selectedCategory && selectedDifficulty) {
-                startBtn.disabled = false;
-                startBtn.classList.remove('opacity-50');
-            } else {
-                startBtn.disabled = true;
-                startBtn.classList.add('opacity-50');
-            }
-        }
-
-        function startSoloGame() {
-            // Get questions for selected category and difficulty
-            const questions = sampleQuestions[selectedCategory] || sampleQuestions.general;
-            currentQuiz = {
-                questions: questions.filter(q => q.difficulty === selectedDifficulty).slice(0, 10),
-                category: selectedCategory,
-                difficulty: selectedDifficulty
-            };
-
-            // Reset game state
-            currentQuestion = 0;
-            gameScore = 0;
-            lifelines = { fiftyFifty: true, skip: true, freeze: true };
-
-            // Show game screen
-            showScreen('soloGameScreen');
-            displayQuestion();
-        }
-
-        function displayQuestion() {
-            if (currentQuestion >= currentQuiz.questions.length) {
-                endGame();
+        // Initialize Solo Play
+        function startSoloPlay() {
+            const name = document.getElementById('playerName').value.trim();
+            if (!name) {
+                alert('Please enter your name to continue!');
                 return;
             }
-
-            const question = currentQuiz.questions[currentQuestion];
             
-            // Update UI
-            document.getElementById('currentQuestion').textContent = currentQuestion + 1;
-            document.getElementById('totalQuestions').textContent = currentQuiz.questions.length;
-            document.getElementById('currentScore').textContent = gameScore;
-            document.getElementById('questionText').textContent = question.question;
-
-            // Display answer options
-            const optionsContainer = document.getElementById('answerOptions');
-            optionsContainer.innerHTML = question.options.map((option, index) => `
-                <button class="answer-option w-full p-4 text-left border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900 transition-all" 
-                        data-index="${index}" onclick="selectAnswer(${index})">
-                    <span class="font-semibold">${String.fromCharCode(65 + index)}.</span> ${option}
-                </button>
-            `).join('');
-
-            // Start timer
-            startTimer(15);
+            gameState.playerName = name;
+            document.getElementById('nameEntry').classList.add('hidden');
+            document.getElementById('categoryGrid').classList.remove('hidden');
+            
+            // Show greeting
+            setTimeout(() => {
+                alert(`Hello ${name}! Welcome to Dimaagwale. Let's test your knowledge! 🧠`);
+            }, 500);
+            
+            renderCategories();
         }
 
-        function startTimer(seconds) {
-            let timeLeft = seconds;
-            const timerDisplay = document.getElementById('timeLeft');
-            const timerCircle = document.getElementById('timerCircle');
-            const circumference = 2 * Math.PI * 36;
+        // Render Categories
+        function renderCategories() {
+            const grid = document.getElementById('categoryGrid');
+            grid.innerHTML = '';
             
-            timerDisplay.textContent = timeLeft;
-            
-            gameTimer = setInterval(() => {
-                timeLeft--;
-                timerDisplay.textContent = timeLeft;
+            categories.forEach(category => {
+                const completed = gameState.completedCategories.has(category.id);
+                const categoryCard = document.createElement('div');
+                categoryCard.className = `bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg card-hover cursor-pointer ${completed ? 'ring-2 ring-green-500' : ''}`;
+                categoryCard.onclick = () => selectCategory(category.id);
                 
-                const progress = (seconds - timeLeft) / seconds;
-                const dashOffset = circumference * progress;
-                timerCircle.style.strokeDashoffset = dashOffset;
+                categoryCard.innerHTML = `
+                    <div class="text-center">
+                        <div class="bg-gradient-to-r ${category.color} rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                            <i class="${category.icon} text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">${category.name}</h3>
+                        ${completed ? 
+                            '<div class="text-green-600 font-semibold"><i class="fas fa-check-circle mr-1"></i>Completed!</div>' +
+                            '<div class="text-sm text-green-600 mt-1">You are now a true Dimaagwala!</div>' :
+                            '<div class="text-gray-600 dark:text-gray-300 text-sm">3 Levels • 30 Questions</div>'
+                        }
+                    </div>
+                `;
                 
-                if (timeLeft <= 0) {
-                    clearInterval(gameTimer);
-                    timeUp();
-                }
-            }, 1000);
-        }
-
-        function selectAnswer(answerIndex) {
-            clearInterval(gameTimer);
-            
-            const question = currentQuiz.questions[currentQuestion];
-            const isCorrect = answerIndex === question.correct;
-            
-            // Highlight correct/incorrect answers
-            const options = document.querySelectorAll('.answer-option');
-            options.forEach((option, index) => {
-                if (index === question.correct) {
-                    option.classList.add('bg-green-500', 'text-white', 'border-green-500');
-                } else if (index === answerIndex && !isCorrect) {
-                    option.classList.add('bg-red-500', 'text-white', 'border-red-500');
-                }
-                option.disabled = true;
+                grid.appendChild(categoryCard);
             });
+        }
 
-            if (isCorrect) {
-                gameScore += calculateScore();
-                showNotification('Correct! +' + calculateScore() + ' points', 'success');
-            } else {
-                showNotification('Incorrect! The correct answer was: ' + question.options[question.correct], 'error');
+        // Select Category
+        function selectCategory(categoryId) {
+            gameState.currentCategory = categoryId;
+            const category = categories.find(c => c.id === categoryId);
+            document.getElementById('categoryTitle').textContent = category.name;
+            
+            updateLevelStatus();
+            showScreen('levelScreen');
+        }
+
+        // Update Level Status
+        function updateLevelStatus() {
+            const levels = ['easy', 'medium', 'hard'];
+            levels.forEach(level => {
+                const statusEl = document.getElementById(`${level}Status`);
+                const key = `${gameState.currentCategory}_${level}`;
+                const completed = gameState.completedLevels[key];
+                
+                if (completed) {
+                    statusEl.innerHTML = '<span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>Completed</span>';
+                } else {
+                    statusEl.innerHTML = '<span class="text-blue-600">Start Challenge</span>';
+                }
+            });
+        }
+
+        // Start Quiz
+        function startQuiz(level) {
+            gameState.currentLevel = level;
+            gameState.currentQuestionIndex = 0;
+            gameState.score = 0;
+            gameState.answeredQuestions = [];
+            
+            // Set lifelines based on level
+            switch(level) {
+                case 'easy':
+                    gameState.lifelines = { fiftyFifty: 2, skip: 2 };
+                    break;
+                case 'medium':
+                    gameState.lifelines = { fiftyFifty: 1, skip: 1 };
+                    break;
+                case 'hard':
+                    gameState.lifelines = { fiftyFifty: 0, skip: 0 };
+                    break;
             }
+            
+            // Get questions for current category and level
+            const categoryQuestions = questionsDatabase[gameState.currentCategory];
+            if (categoryQuestions && categoryQuestions[level]) {
+                gameState.questions = [...categoryQuestions[level]];
+            } else {
+                // Fallback questions if category not found
+                gameState.questions = questionsDatabase.science.easy.slice(0, 10);
+            }
+            
+            showScreen('quizScreen');
+            displayQuestion();
+            updateQuizUI();
+        }
 
+        // Display Question
+        function displayQuestion() {
+            const question = gameState.questions[gameState.currentQuestionIndex];
+            document.getElementById('questionText').textContent = question.question;
+            document.getElementById('currentQuestion').textContent = gameState.currentQuestionIndex + 1;
+            document.getElementById('totalQuestions').textContent = gameState.questions.length;
+            
+            const progress = ((gameState.currentQuestionIndex + 1) / gameState.questions.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'w-full text-left p-4 rounded-lg border border-gray-300 dark:border-gray-600 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900 transition-colors';
+                button.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+                button.onclick = () => selectAnswer(index);
+                button.id = `option${index}`;
+                optionsContainer.appendChild(button);
+            });
+            
+            // Hide explanation card
+            document.getElementById('explanationCard').classList.add('hidden');
+        }
+
+        // Select Answer
+        function selectAnswer(selectedIndex) {
+            const question = gameState.questions[gameState.currentQuestionIndex];
+            const isCorrect = selectedIndex === question.correctAnswer;
+            
+            // Disable all options
+            document.querySelectorAll('#optionsContainer button').forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-50');
+            });
+            
+            // Highlight correct and selected answers
+            const selectedBtn = document.getElementById(`option${selectedIndex}`);
+            const correctBtn = document.getElementById(`option${question.correctAnswer}`);
+            
+            if (isCorrect) {
+                selectedBtn.classList.add('bg-green-500', 'text-white', 'border-green-500');
+                gameState.score += 10;
+                showMotivationalMessage('Smart thinking! 🎉');
+            } else {
+                selectedBtn.classList.add('bg-red-500', 'text-white', 'border-red-500');
+                correctBtn.classList.add('bg-green-500', 'text-white', 'border-green-500');
+            }
+            
+            // Show explanation
+            document.getElementById('explanationText').textContent = question.explanation;
+            document.getElementById('explanationCard').classList.remove('hidden');
+            
+            gameState.answeredQuestions.push({
+                question: question.question,
+                selectedAnswer: selectedIndex,
+                correctAnswer: question.correctAnswer,
+                isCorrect: isCorrect
+            });
+            
             // Move to next question after delay
             setTimeout(() => {
-                currentQuestion++;
+                nextQuestion();
+            }, 3000);
+        }
+
+        // Next Question
+        function nextQuestion() {
+            gameState.currentQuestionIndex++;
+            updateQuizUI();
+            
+            if (gameState.currentQuestionIndex < gameState.questions.length) {
                 displayQuestion();
-            }, 2000);
+            } else {
+                endQuiz();
+            }
         }
 
-        function timeUp() {
-            const question = currentQuiz.questions[currentQuestion];
+        // Update Quiz UI
+        function updateQuizUI() {
+            document.getElementById('currentScore').textContent = gameState.score;
+            document.getElementById('scoreDisplay').textContent = gameState.score;
             
-            // Highlight correct answer
-            const options = document.querySelectorAll('.answer-option');
-            options[question.correct].classList.add('bg-green-500', 'text-white', 'border-green-500');
+            // Update lifeline buttons
+            const fiftyBtn = document.getElementById('fiftyFiftyBtn');
+            const skipBtn = document.getElementById('skipBtn');
             
-            showNotification('Time\'s up! The correct answer was: ' + question.options[question.correct], 'warning');
+            fiftyBtn.disabled = gameState.lifelines.fiftyFifty <= 0;
+            skipBtn.disabled = gameState.lifelines.skip <= 0;
             
-            setTimeout(() => {
-                currentQuestion++;
-                displayQuestion();
-            }, 2000);
+            fiftyBtn.textContent = `50-50 (${gameState.lifelines.fiftyFifty})`;
+            skipBtn.textContent = `Skip (${gameState.lifelines.skip})`;
+            
+            if (gameState.lifelines.fiftyFifty <= 0 && gameState.lifelines.skip <= 0) {
+                document.getElementById('lifelinesContainer').style.display = 'none';
+            }
         }
 
-        function calculateScore() {
-            // Base score with time bonus
-            const timeLeft = parseInt(document.getElementById('timeLeft').textContent);
-            return 100 + (timeLeft * 5);
-        }
-
-        function use5050() {
-            if (!lifelines.fiftyFifty) return;
+        // Use Fifty-Fifty Lifeline
+        function useFiftyFifty() {
+            if (gameState.lifelines.fiftyFifty <= 0) return;
             
-            lifelines.fiftyFifty = false;
-            document.getElementById('lifeline5050').disabled = true;
-            document.getElementById('lifeline5050').classList.add('opacity-50');
+            gameState.lifelines.fiftyFifty--;
+            const question = gameState.questions[gameState.currentQuestionIndex];
+            const correctIndex = question.correctAnswer;
             
-            const question = currentQuiz.questions[currentQuestion];
-            const options = document.querySelectorAll('.answer-option');
-            let wrongAnswers = [];
+            // Randomly select one wrong answer to keep
+            const wrongIndices = [0, 1, 2, 3].filter(i => i !== correctIndex);
+            const keepWrong = wrongIndices[Math.floor(Math.random() * wrongIndices.length)];
             
-            options.forEach((option, index) => {
-                if (index !== question.correct) {
-                    wrongAnswers.push(index);
+            // Hide two wrong options
+            wrongIndices.forEach(index => {
+                if (index !== keepWrong) {
+                    document.getElementById(`option${index}`).style.display = 'none';
                 }
             });
             
-            // Hide 2 wrong answers
-            const toHide = wrongAnswers.slice(0, 2);
-            toHide.forEach(index => {
-                options[index].style.display = 'none';
+            updateQuizUI();
+        }
+
+        // Skip Question Lifeline
+        function skipQuestion() {
+            if (gameState.lifelines.skip <= 0) return;
+            
+            gameState.lifelines.skip--;
+            gameState.answeredQuestions.push({
+                question: gameState.questions[gameState.currentQuestionIndex].question,
+                selectedAnswer: -1,
+                correctAnswer: gameState.questions[gameState.currentQuestionIndex].correctAnswer,
+                isCorrect: false,
+                skipped: true
             });
             
-            showNotification('50-50 lifeline used! Two wrong answers removed.', 'info');
+            nextQuestion();
         }
 
-        function useSkip() {
-            if (!lifelines.skip) return;
+        // End Quiz
+        function endQuiz() {
+            const correctAnswers = gameState.answeredQuestions.filter(q => q.isCorrect).length;
+            const totalQuestions = gameState.questions.length;
+            const percentage = Math.round((correctAnswers / totalQuestions) * 100);
             
-            lifelines.skip = false;
-            document.getElementById('lifelineSkip').disabled = true;
-            document.getElementById('lifelineSkip').classList.add('opacity-50');
+            // Update level completion
+            const levelKey = `${gameState.currentCategory}_${gameState.currentLevel}`;
+            gameState.completedLevels[levelKey] = true;
             
-            showNotification('Question skipped!', 'info');
+            // Check if all levels completed for category
+            const allLevels = ['easy', 'medium', 'hard'];
+            const categoryCompleted = allLevels.every(level => 
+                gameState.completedLevels[`${gameState.currentCategory}_${level}`]
+            );
             
-            setTimeout(() => {
-                currentQuestion++;
-                displayQuestion();
-            }, 1000);
+            if (categoryCompleted) {
+                gameState.completedCategories.add(gameState.currentCategory);
+            }
+            
+            showResults(correctAnswers, totalQuestions, percentage, categoryCompleted);
         }
 
-        function useFreeze() {
-            if (!lifelines.freeze) return;
+        // Show Results
+        function showResults(correct, total, percentage, categoryCompleted) {
+            const resultIcon = document.getElementById('resultIcon');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultStats = document.getElementById('resultStats');
+            const resultMessage = document.getElementById('resultMessage');
             
-            lifelines.freeze = false;
-            document.getElementById('lifelineFreeze').disabled = true;
-            document.getElementById('lifelineFreeze').classList.add('opacity-50');
+            if (percentage >= 80) {
+                resultIcon.innerHTML = '🏆';
+                resultTitle.textContent = 'Excellent!';
+                resultMessage.textContent = 'You are truly one of the Dimaagwale! 🧠✨';
+            } else if (percentage >= 60) {
+                resultIcon.innerHTML = '🎉';
+                resultTitle.textContent = 'Well Done!';
+                resultMessage.textContent = 'Great job! Knowledge is your superpower! 💪';
+            } else {
+                resultIcon.innerHTML = '📚';
+                resultTitle.textContent = 'Keep Learning!';
+                resultMessage.textContent = 'Practice makes perfect. Try again! 🚀';
+            }
             
-            clearInterval(gameTimer);
-            showNotification('Timer frozen for this question!', 'info');
-        }
-
-        function endGame() {
-            const accuracy = Math.round((gameScore / (currentQuiz.questions.length * 100)) * 100);
-            const xpGained = Math.floor(gameScore / 10);
+            resultStats.innerHTML = `
+                <div class="text-gray-600 dark:text-gray-300">Score: <span class="font-bold text-purple-600">${gameState.score} points</span></div>
+                <div class="text-gray-600 dark:text-gray-300">Correct: <span class="font-bold text-green-600">${correct}/${total}</span></div>
+                <div class="text-gray-600 dark:text-gray-300">Percentage: <span class="font-bold text-blue-600">${percentage}%</span></div>
+                ${categoryCompleted ? '<div class="text-green-600 font-bold">🎊 Category Mastered! You are now a true Dimaagwala in this category! 🎊</div>' : ''}
+            `;
             
-            // Update user stats
-            currentUser.xp += xpGained;
-            currentUser.gamesPlayed++;
-            saveUserData();
+            if (categoryCompleted) {
+                createConfetti();
+            }
             
-            // Show results
-            showGameResults(gameScore, accuracy, xpGained);
-        }
-
-        function showGameResults(score, accuracy, xp) {
             showScreen('resultsScreen');
-            
-            // Determine result type
-            let resultIcon, resultTitle, resultSubtitle;
-            if (accuracy >= 80) {
-                resultIcon = '<i class="fas fa-trophy text-yellow-500"></i>';
-                resultTitle = 'Excellent!';
-                resultSubtitle = 'Outstanding performance!';
-                triggerConfetti();
-            } else if (accuracy >= 60) {
-                resultIcon = '<i class="fas fa-medal text-blue-500"></i>';
-                resultTitle = 'Well Done!';
-                resultSubtitle = 'Good job completing the quiz!';
-            } else {
-                resultIcon = '<i class="fas fa-thumbs-up text-green-500"></i>';
-                resultTitle = 'Keep Practicing!';
-                resultSubtitle = 'You\'re improving with each game!';
-            }
-            
-            document.getElementById('resultIcon').innerHTML = resultIcon;
-            document.getElementById('resultTitle').textContent = resultTitle;
-            document.getElementById('resultSubtitle').textContent = resultSubtitle;
-            document.getElementById('finalScore').textContent = score;
-            document.getElementById('accuracyPercent').textContent = accuracy + '%';
-            document.getElementById('xpGained').textContent = '+' + xp;
-            
-            // Create performance chart
-            createPerformanceChart(accuracy);
-            
-            // Show ad opportunity
-            setTimeout(() => {
-                if (Math.random() > 0.5) {
-                    showAdModal();
-                }
-            }, 3000);
         }
 
-        function createPerformanceChart(accuracy) {
-            const ctx = document.getElementById('performanceChart').getContext('2d');
-            
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Correct', 'Incorrect'],
-                    datasets: [{
-                        data: [accuracy, 100 - accuracy],
-                        backgroundColor: ['#8b5cf6', '#e5e7eb'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-        }
-
-        function triggerConfetti() {
-            const confettiContainer = document.getElementById('confetti');
-            confettiContainer.classList.remove('hidden');
-            
-            // Create confetti pieces
+        // Create Confetti Effect
+        function createConfetti() {
             for (let i = 0; i < 50; i++) {
-                const confettiPiece = document.createElement('div');
-                confettiPiece.className = 'confetti-piece';
-                confettiPiece.style.left = Math.random() * 100 + '%';
-                confettiPiece.style.backgroundColor = ['#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#3b82f6'][Math.floor(Math.random() * 5)];
-                confettiPiece.style.animationDelay = Math.random() * 3 + 's';
-                confettiContainer.appendChild(confettiPiece);
-            }
-            
-            // Clean up after animation
-            setTimeout(() => {
-                confettiContainer.classList.add('hidden');
-                confettiContainer.innerHTML = '';
-            }, 6000);
-        }
-
-        function startQuickMatch() {
-            showNotification('Finding players...', 'info');
-            
-            // Simulate matchmaking
-            setTimeout(() => {
-                showNotification('Match found! Joining game...', 'success');
                 setTimeout(() => {
-                    startBattleGame('QM' + Math.random().toString(36).substr(2, 4).toUpperCase());
-                }, 1500);
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.background = ['#667eea', '#764ba2', '#f093fb', '#f5576c'][Math.floor(Math.random() * 4)];
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }, i * 100);
+            }
+        }
+
+        // Show Motivational Message
+        function showMotivationalMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 pulse-animation';
+            messageDiv.textContent = message;
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
             }, 2000);
         }
 
-        function joinBattleRoom() {
-            const roomCode = document.getElementById('roomCode').value.trim();
-            if (!roomCode) {
-                showNotification('Please enter a room code', 'error');
-                return;
+        // Exit Quiz
+        function exitQuiz() {
+            if (confirm('Are you sure you want to exit the quiz? Your progress will be lost.')) {
+                showScreen('levelScreen');
             }
-            
-            showNotification('Joining room ' + roomCode + '...', 'info');
-            setTimeout(() => {
-                startBattleGame(roomCode);
-            }, 1000);
         }
 
-        function joinSpecificRoom(roomCode) {
-            showNotification('Joining room ' + roomCode + '...', 'info');
-            setTimeout(() => {
-                startBattleGame(roomCode);
-            }, 1000);
+        // Retry Quiz
+        function retryQuiz() {
+            startQuiz(gameState.currentLevel);
         }
 
-        function startBattleGame(roomCode) {
-            showScreen('battleGameScreen');
-            document.getElementById('battleRoomCode').textContent = roomCode;
-            
-            // Simulate other players
-            const players = [
-                { name: currentUser.name, score: 0, answered: false },
-                { name: 'Player2', score: 0, answered: false },
-                { name: 'Player3', score: 0, answered: false },
-                { name: 'Player4', score: 0, answered: false }
-            ];
-            
-            // Start battle quiz
-            currentQuiz = {
-                questions: sampleQuestions.general.slice(0, 10),
-                players: players,
-                currentQuestion: 0
-            };
-            
-            displayBattleQuestion();
+        // Go Home
+        function goHome() {
+            showScreen('homeScreen');
         }
 
-        function displayBattleQuestion() {
-            if (currentQuiz.currentQuestion >= currentQuiz.questions.length) {
-                endBattleGame();
-                return;
-            }
+        // Initialize Global Quizzes
+        function initializeGlobalQuizzes() {
+            const container = document.getElementById('globalQuizzesScreen').querySelector('.grid');
+            container.innerHTML = '';
             
-            const question = currentQuiz.questions[currentQuiz.currentQuestion];
-            
-            document.getElementById('battleCurrentQuestion').textContent = currentQuiz.currentQuestion + 1;
-            document.getElementById('battleQuestionText').textContent = question.question;
-            
-            const optionsContainer = document.getElementById('battleAnswerOptions');
-            optionsContainer.innerHTML = question.options.map((option, index) => `
-                <button class="battle-answer w-full p-4 text-left border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900 transition-all" 
-                        data-index="${index}" onclick="selectBattleAnswer(${index})">
-                    <span class="font-semibold">${String.fromCharCode(65 + index)}.</span> ${option}
-                </button>
-            `).join('');
-            
-            updateBattleLeaderboard();
-            startBattleTimer(15);
-        }
-
-        function startBattleTimer(seconds) {
-            let timeLeft = seconds;
-            const timerDisplay = document.getElementById('battleTimeLeft');
-            const timerCircle = document.getElementById('battleTimerCircle');
-            const circumference = 2 * Math.PI * 36;
-            
-            timerDisplay.textContent = timeLeft;
-            
-            gameTimer = setInterval(() => {
-                timeLeft--;
-                timerDisplay.textContent = timeLeft;
+            countries.forEach(country => {
+                const countryCard = document.createElement('div');
+                countryCard.className = 'bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg card-hover cursor-pointer';
+                countryCard.onclick = () => selectCountry(country.id);
                 
-                const progress = (seconds - timeLeft) / seconds;
-                const dashOffset = circumference * progress;
-                timerCircle.style.strokeDashoffset = dashOffset;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(gameTimer);
-                    battleTimeUp();
-                }
-            }, 1000);
-        }
-
-        function selectBattleAnswer(answerIndex) {
-            clearInterval(gameTimer);
-            
-            const question = currentQuiz.questions[currentQuiz.currentQuestion];
-            const isCorrect = answerIndex === question.correct;
-            const timeBonus = parseInt(document.getElementById('battleTimeLeft').textContent) * 10;
-            
-            if (isCorrect) {
-                const scoreGain = 100 + timeBonus;
-                currentQuiz.players[0].score += scoreGain;
-                showNotification(`Correct! +${scoreGain} points`, 'success');
-            } else {
-                showNotification('Incorrect!', 'error');
-            }
-            
-            // Simulate other players answering
-            simulateOtherPlayerAnswers();
-            
-            // Highlight answers
-            highlightBattleAnswers(question.correct, answerIndex);
-            
-            setTimeout(() => {
-                currentQuiz.currentQuestion++;
-                displayBattleQuestion();
-            }, 3000);
-        }
-
-        function simulateOtherPlayerAnswers() {
-            const question = currentQuiz.questions[currentQuiz.currentQuestion];
-            
-            currentQuiz.players.slice(1).forEach(player => {
-                const isCorrect = Math.random() > 0.3; // 70% chance of correct answer
-                if (isCorrect) {
-                    const timeBonus = Math.floor(Math.random() * 10) * 10;
-                    player.score += 100 + timeBonus;
-                }
-                player.answered = true;
-            });
-        }
-
-        function highlightBattleAnswers(correctIndex, selectedIndex) {
-            const options = document.querySelectorAll('.battle-answer');
-            options.forEach((option, index) => {
-                if (index === correctIndex) {
-                    option.classList.add('bg-green-500', 'text-white', 'border-green-500');
-                } else if (index === selectedIndex && selectedIndex !== correctIndex) {
-                    option.classList.add('bg-red-500', 'text-white', 'border-red-500');
-                }
-                option.disabled = true;
-            });
-        }
-
-        function battleTimeUp() {
-            showNotification('Time\'s up!', 'warning');
-            simulateOtherPlayerAnswers();
-            
-            const question = currentQuiz.questions[currentQuiz.currentQuestion];
-            const options = document.querySelectorAll('.battle-answer');
-            options[question.correct].classList.add('bg-green-500', 'text-white', 'border-green-500');
-            
-            setTimeout(() => {
-                currentQuiz.currentQuestion++;
-                displayBattleQuestion();
-            }, 3000);
-        }
-
-        function updateBattleLeaderboard() {
-            const container = document.getElementById('battleLeaderboard');
-            const sortedPlayers = [...currentQuiz.players].sort((a, b) => b.score - a.score);
-            
-            container.innerHTML = sortedPlayers.map((player, index) => `
-                <div class="flex items-center justify-between text-sm">
-                    <div class="flex items-center space-x-2">
-                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                            index === 0 ? 'bg-yellow-500 text-white' : 
-                            index === 1 ? 'bg-gray-400 text-white' : 
-                            index === 2 ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700'
-                        }">
-                            ${index + 1}
-                        </span>
-                        <span class="font-medium ${player.name === currentUser.name ? 'text-purple-600' : 'text-gray-800 dark:text-white'}">${player.name}</span>
+                countryCard.innerHTML = `
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">${country.flag}</div>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">${country.name}</h3>
+                        <div class="text-gray-600 dark:text-gray-300 text-sm">${country.topics.length} Topics Available</div>
                     </div>
-                    <span class="font-bold text-gray-800 dark:text-white">${player.score}</span>
-                </div>
-            `).join('');
+                `;
+                
+                container.appendChild(countryCard);
+            });
         }
 
-        function leaveBattle() {
-            if (confirm('Are you sure you want to leave the battle?')) {
-                clearInterval(gameTimer);
-                showScreen('battleScreen');
-                showNotification('Left the battle', 'info');
-            }
-        }
-
-        function endBattleGame() {
-            const finalPosition = currentQuiz.players.sort((a, b) => b.score - a.score).findIndex(p => p.name === currentUser.name) + 1;
-            const playerScore = currentQuiz.players.find(p => p.name === currentUser.name).score;
+        // Select Country
+        function selectCountry(countryId) {
+            gameState.currentCountry = countryId;
+            const country = countries.find(c => c.id === countryId);
+            document.getElementById('countryTitle').textContent = country.name;
             
-            let resultMessage = '';
-            let xpGain = 0;
+            const topicsGrid = document.getElementById('topicsGrid');
+            topicsGrid.innerHTML = '';
             
-            if (finalPosition === 1) {
-                resultMessage = '🏆 Victory! You came in 1st place!';
-                xpGain = 200;
-                triggerConfetti();
-            } else if (finalPosition <= 3) {
-                resultMessage = `🥉 Great job! You came in ${finalPosition}${finalPosition === 2 ? 'nd' : 'rd'} place!`;
-                xpGain = 100;
-            } else {
-                resultMessage = `You finished in ${finalPosition}th place. Keep practicing!`;
-                xpGain = 50;
-            }
-            
-            currentUser.xp += xpGain;
-            saveUserData();
-            
-            showNotification(resultMessage, 'success');
-            
-            setTimeout(() => {
-                showScreen('homeScreen');
-                updateUserDisplay();
-            }, 3000);
-        }
-
-        function addQuestionForm() {
-            const container = document.getElementById('questionsList');
-            const questionNumber = container.children.length + 1;
-            
-            const questionForm = document.createElement('div');
-            questionForm.className = 'question-form bg-gray-50 dark:bg-gray-700 p-4 rounded-lg';
-            questionForm.innerHTML = `
-                <div class="flex justify-between items-center mb-3">
-                    <h4 class="font-semibold text-gray-800 dark:text-white">Question ${questionNumber}</h4>
-                    <button onclick="removeQuestion(this)" class="text-red-500 hover:text-red-700">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-                <div class="space-y-3">
-                    <input type="text" placeholder="Enter your question" class="question-text w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <input type="text" placeholder="Option A" class="option-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required>
-                        <input type="text" placeholder="Option B" class="option-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required>
-                        <input type="text" placeholder="Option C" class="option-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required>
-                        <input type="text" placeholder="Option D" class="option-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+            country.topics.forEach(topic => {
+                const topicCard = document.createElement('div');
+                topicCard.className = 'bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg card-hover cursor-pointer';
+                topicCard.onclick = () => startGlobalQuiz(countryId, topic);
+                
+                topicCard.innerHTML = `
+                    <div class="text-center">
+                        <div class="gradient-bg rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-globe-americas text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">${topic}</h3>
+                        <div class="text-gray-600 dark:text-gray-300 text-sm">10 Questions</div>
                     </div>
-                    <select class="correct-answer w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required>
-                        <option value="">Select correct answer</option>
-                        <option value="0">Option A</option>
-                        <option value="1">Option B</option>
-                        <option value="2">Option C</option>
-                        <option value="3">Option D</option>
-                    </select>
-                </div>
-            `;
+                `;
+                
+                topicsGrid.appendChild(topicCard);
+            });
             
-            container.appendChild(questionForm);
+            showScreen('countryTopicsScreen');
         }
 
-        function removeQuestion(button) {
-            button.closest('.question-form').remove();
+        // Start Global Quiz
+        function startGlobalQuiz(countryId, topic) {
+            gameState.currentCountry = countryId;
+            gameState.currentTopic = topic;
+            gameState.currentQuestionIndex = 0;
+            gameState.score = 0;
+            gameState.answeredQuestions = [];
+            gameState.lifelines = { fiftyFifty: 1, skip: 1 };
             
-            // Renumber remaining questions
-            const forms = document.querySelectorAll('.question-form');
-            forms.forEach((form, index) => {
-                const header = form.querySelector('h4');
-                header.textContent = `Question ${index + 1}`;
+            // Get questions for current country and topic
+            const countryQuestions = globalQuestions[countryId];
+            if (countryQuestions && countryQuestions[topic]) {
+                gameState.questions = [...countryQuestions[topic]];
+            } else {
+                // Fallback questions
+                gameState.questions = questionsDatabase.science.easy.slice(0, 5);
+            }
+            
+            showScreen('quizScreen');
+            displayQuestion();
+            updateQuizUI();
+        }
+
+        // Initialize Aspirants Corner
+        function initializeAspirantsCorner() {
+            const container = document.getElementById('aspirantsCornerScreen').querySelector('.grid');
+            container.innerHTML = '';
+            
+            exams.forEach(exam => {
+                const examCard = document.createElement('div');
+                examCard.className = 'bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg card-hover cursor-pointer';
+                examCard.onclick = () => selectExam(exam.id);
+                
+                examCard.innerHTML = `
+                    <div class="text-center">
+                        <div class="gradient-bg rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-graduation-cap text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">${exam.name}</h3>
+                        <div class="text-gray-600 dark:text-gray-300 text-sm">${exam.subjects.length} Subjects</div>
+                    </div>
+                `;
+                
+                container.appendChild(examCard);
             });
         }
 
-        function saveQuiz() {
-            const title = document.getElementById('quizTitle').value.trim();
-            const category = document.getElementById('quizCategory').value;
-            const timePerQuestion = document.getElementById('questionTime').value;
-            const mode = document.getElementById('quizMode').value;
+        // Select Exam
+        function selectExam(examId) {
+            gameState.currentExam = examId;
+            const exam = exams.find(e => e.id === examId);
+            document.getElementById('examTitle').textContent = exam.name;
             
-            if (!title) {
-                showNotification('Please enter a quiz title', 'error');
-                return;
-            }
+            const subjectsGrid = document.getElementById('subjectsGrid');
+            subjectsGrid.innerHTML = '';
             
-            const questionForms = document.querySelectorAll('.question-form');
-            if (questionForms.length === 0) {
-                showNotification('Please add at least one question', 'error');
-                return;
-            }
-            
-            const questions = [];
-            let isValid = true;
-            
-            questionForms.forEach(form => {
-                const questionText = form.querySelector('.question-text').value.trim();
-                const options = Array.from(form.querySelectorAll('.option-input')).map(input => input.value.trim());
-                const correctAnswer = form.querySelector('.correct-answer').value;
+            exam.subjects.forEach(subject => {
+                const subjectCard = document.createElement('div');
+                subjectCard.className = 'bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg card-hover cursor-pointer';
+                subjectCard.onclick = () => startAspirantQuiz(examId, subject);
                 
-                if (!questionText || options.some(opt => !opt) || correctAnswer === '') {
-                    isValid = false;
-                    return;
-                }
+                subjectCard.innerHTML = `
+                    <div class="text-center">
+                        <div class="gradient-bg rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-book text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">${subject}</h3>
+                        <div class="text-gray-600 dark:text-gray-300 text-sm">Practice Questions</div>
+                    </div>
+                `;
                 
-                questions.push({
-                    question: questionText,
-                    options: options,
-                    correct: parseInt(correctAnswer)
-                });
+                subjectsGrid.appendChild(subjectCard);
             });
             
-            if (!isValid) {
-                showNotification('Please fill in all question fields', 'error');
-                return;
+            showScreen('examSubjectsScreen');
+        }
+
+        // Start Aspirant Quiz
+        function startAspirantQuiz(examId, subject) {
+            gameState.currentExam = examId;
+            gameState.currentSubject = subject;
+            gameState.currentQuestionIndex = 0;
+            gameState.score = 0;
+            gameState.answeredQuestions = [];
+            gameState.lifelines = { fiftyFifty: 1, skip: 0 }; // Exam-style lifelines
+            
+            // Get questions for current exam and subject
+            const examQuestions = aspirantsQuestions[examId];
+            if (examQuestions && examQuestions[subject]) {
+                gameState.questions = [...examQuestions[subject]];
+            } else {
+                // Fallback questions
+                gameState.questions = questionsDatabase.science.medium.slice(0, 5);
             }
             
-            // Save quiz (in real app, this would go to server)
-            const quiz = {
-                id: Date.now(),
-                title,
-                category,
-                timePerQuestion: parseInt(timePerQuestion),
-                mode,
-                questions,
-                created: new Date().toISOString(),
-                plays: 0
-            };
-            
-            // Save to localStorage
-            const savedQuizzes = JSON.parse(localStorage.getItem('dimaagwalaQuizzes') || '[]');
-            savedQuizzes.push(quiz);
-            localStorage.setItem('dimaagwalaQuizzes', JSON.stringify(savedQuizzes));
-            
-            showNotification('Quiz saved successfully!', 'success');
-            showScreen('organizerScreen');
-            populateMyQuizzes();
-            
-            // Clear form
-            document.getElementById('quizTitle').value = '';
-            document.getElementById('questionsList').innerHTML = '';
+            showScreen('quizScreen');
+            displayQuestion();
+            updateQuizUI();
         }
 
-        function handleCSVUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeGlobalQuizzes();
+            initializeAspirantsCorner();
             
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const csv = e.target.result;
-                    const lines = csv.split('\n').filter(line => line.trim());
-                    const questions = [];
-                    
-                    // Skip header if exists
-                    const startIndex = lines[0].toLowerCase().includes('question') ? 1 : 0;
-                    
-                    for (let i = startIndex; i < lines.length; i++) {
-                        const parts = lines[i].split(',').map(part => part.trim().replace(/"/g, ''));
-                        if (parts.length >= 6) {
-                            questions.push({
-                                question: parts[0],
-                                options: [parts[1], parts[2], parts[3], parts[4]],
-                                correct: parseInt(parts[5]) || 0
-                            });
-                        }
-                    }
-                    
-                    if (questions.length > 0) {
-                        // Auto-populate questions
-                        const container = document.getElementById('questionsList');
-                        container.innerHTML = '';
-                        
-                        questions.forEach((q, index) => {
-                            addQuestionForm();
-                            const form = container.lastElementChild;
-                            form.querySelector('.question-text').value = q.question;
-                            const optionInputs = form.querySelectorAll('.option-input');
-                            q.options.forEach((option, i) => {
-                                if (optionInputs[i]) optionInputs[i].value = option;
-                            });
-                            form.querySelector('.correct-answer').value = q.correct;
-                        });
-                        
-                        showNotification(`Imported ${questions.length} questions successfully!`, 'success');
-                    } else {
-                        showNotification('No valid questions found in CSV', 'error');
-                    }
-                } catch (error) {
-                    showNotification('Error reading CSV file', 'error');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function hostQuiz(quizTitle) {
-            showScreen('hostQuizScreen');
-            
-            // Generate room code
-            const roomCode = 'QUIZ' + Math.random().toString(36).substr(2, 3).toUpperCase();
-            document.getElementById('hostRoomCode').textContent = roomCode;
-            document.getElementById('playerCount').textContent = '0';
-            
-            // Simulate players joining
-            let playerCount = 0;
-            const joinInterval = setInterval(() => {
-                if (playerCount < 8 && Math.random() > 0.3) {
-                    playerCount++;
-                    document.getElementById('playerCount').textContent = playerCount;
-                    showNotification(`Player ${playerCount} joined!`, 'info');
-                }
-                
-                if (playerCount >= 5 || Math.random() > 0.8) {
-                    clearInterval(joinInterval);
-                }
-            }, 2000);
-            
-            showNotification(`Quiz room ${roomCode} created! Share the code with players.`, 'success');
-        }
-
-        function endQuizSession() {
-            if (confirm('Are you sure you want to end the quiz session?')) {
-                showScreen('organizerScreen');
-                showNotification('Quiz session ended', 'info');
+            // Load saved progress from localStorage
+            const savedProgress = localStorage.getItem('dimaagwaleProgress');
+            if (savedProgress) {
+                const progress = JSON.parse(savedProgress);
+                gameState.completedCategories = new Set(progress.completedCategories || []);
+                gameState.completedLevels = progress.completedLevels || {};
             }
-        }
-
-        function playAgain() {
-            showScreen('soloScreen');
-        }
-
-        function showAdModal() {
-            document.getElementById('adModal').classList.remove('hidden');
-        }
-
-        function closeAdModal() {
-            document.getElementById('adModal').classList.add('hidden');
-        }
-
-        function watchAd() {
-            closeAdModal();
-            showNotification('Watching ad...', 'info');
             
-            // Simulate ad watching
-            setTimeout(() => {
-                currentUser.coins += 50;
-                updateUserDisplay();
-                saveUserData();
-                showNotification('Thanks for watching! +50 coins earned', 'success');
-            }, 3000);
-        }
-
-        function showNotification(message, type = 'info') {
-            const container = document.getElementById('notifications');
-            const notification = document.createElement('div');
-            
-            const colors = {
-                success: 'bg-green-500',
-                error: 'bg-red-500',
-                warning: 'bg-yellow-500',
-                info: 'bg-blue-500'
-            };
-            
-            const icons = {
-                success: 'fa-check-circle',
-                error: 'fa-exclamation-circle',
-                warning: 'fa-exclamation-triangle',
-                info: 'fa-info-circle'
-            };
-            
-            notification.className = `notification ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 max-w-sm`;
-            notification.innerHTML = `
-                <i class="fas ${icons[type]}"></i>
-                <span>${message}</span>
-                <button onclick="this.parentElement.remove()" class="ml-auto">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            
-            container.appendChild(notification);
-            
-            // Auto remove after 5 seconds
-            setTimeout(() => {
-                if (notification.parentElement) {
-                    notification.remove();
-                }
-            }, 5000);
-        }
-
-        // Initialize some sample data on first load
-        if (!localStorage.getItem('dimaagwalaInitialized')) {
-            localStorage.setItem('dimaagwalaInitialized', 'true');
-            // Add any initialization logic here
-        }
+            // Save progress periodically
+            setInterval(() => {
+                const progress = {
+                    completedCategories: Array.from(gameState.completedCategories),
+                    completedLevels: gameState.completedLevels
+                };
+                localStorage.setItem('dimaagwaleProgress', JSON.stringify(progress));
+            }, 10000); // Save every 10 seconds
+        });
     </script>
-
-<!-- Profile Modal -->
-<div id="profileModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;">
-  <div style="background:#fff;padding:25px 30px;border-radius:12px;max-width:400px;width:90%;">
-    <h2 style="font-size:20px;margin-bottom:15px;text-align:center;">Create Your Profile</h2>
-    <input id="firstName" placeholder="First Name" style="width:100%;padding:10px;margin-bottom:10px;" />
-    <input id="lastName" placeholder="Last Name" style="width:100%;padding:10px;margin-bottom:10px;" />
-    <input id="age" type="number" placeholder="Age (optional)" style="width:100%;padding:10px;margin-bottom:10px;" />
-    <input id="email" type="email" placeholder="Email (required)" style="width:100%;padding:10px;margin-bottom:15px;" />
-    <button onclick="saveUserProfile()" style="width:100%;padding:10px;background:#4CAF50;color:white;border:none;border-radius:5px;">Save Profile</button>
-  </div>
-</div>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const profile = JSON.parse(localStorage.getItem("dimaagwalaUserProfile") || "null");
-  if (!profile || !profile.email) {
-    document.getElementById("profileModal").style.display = "flex";
-  } else {
-    const userNameEl = document.getElementById("userName");
-    if (userNameEl) userNameEl.textContent = profile.name;
-  }
-});
-
-function validateEmail(email) {
-  const re = /^\S+@\S+\.\S+$/;
-  return re.test(email);
-}
-
-function saveUserProfile() {
-  const firstName = document.getElementById("firstName").value.trim();
-  const lastName = document.getElementById("lastName").value.trim();
-  const age = document.getElementById("age").value.trim();
-  const email = document.getElementById("email").value.trim();
-
-  if (!firstName || !lastName || !email || !validateEmail(email)) {
-    alert("Please fill out First Name, Last Name, and a valid Email.");
-    return;
-  }
-
-  const profile = {
-    name: firstName + " " + lastName,
-    age: age,
-    email: email
-  };
-
-  localStorage.setItem("dimaagwalaUserProfile", JSON.stringify(profile));
-  document.getElementById("profileModal").style.display = "none";
-  const userNameEl = document.getElementById("userName");
-  if (userNameEl) userNameEl.textContent = profile.name;
-}
-</script>
-
 </body>
 </html>
